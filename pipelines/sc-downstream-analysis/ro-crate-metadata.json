@@ -120,5 +120,6 @@
       "encodingFormat": "text/csv",
       "name": "cluster assignments CSV"
     }
-  ]
+  ],
+  "version": "1.0.0"
 }
