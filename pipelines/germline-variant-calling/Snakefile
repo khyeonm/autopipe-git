@@ -1,0 +1,58 @@
+configfile: "config.yaml"
+
+SAMPLES = config["samples"]
+REFERENCE = config["reference"]
+REF_DICT = "/output/ref/" + REFERENCE.split("/")[-1].replace(".fa", ".dict").replace(".fasta", ".dict")
+REF_COPY = "/output/ref/" + REFERENCE.split("/")[-1]
+
+rule all:
+    input:
+        expand("/output/{sample}.g.vcf.gz", sample=SAMPLES),
+        expand("/output/{sample}.g.vcf.gz.tbi", sample=SAMPLES)
+
+rule prepare_reference:
+    """Copy reference to writable location and create sequence dictionary."""
+    input:
+        ref=REFERENCE,
+        fai=REFERENCE + ".fai"
+    output:
+        ref=REF_COPY,
+        fai=REF_COPY + ".fai",
+        dic=REF_DICT
+    log:
+        "/output/logs/prepare_reference.log"
+    shell:
+        """
+        mkdir -p /output/ref
+        cp {input.ref} {output.ref}
+        cp {input.fai} {output.fai}
+        gatk CreateSequenceDictionary -R {output.ref} -O {output.dic} 2> {log}
+        """
+
+rule haplotype_caller:
+    """Run GATK HaplotypeCaller in GVCF mode per sample."""
+    input:
+        bam="/input/{sample}.bam",
+        bai="/input/{sample}.bam.bai",
+        ref=REF_COPY,
+        dic=REF_DICT
+    output:
+        gvcf="/output/{sample}.g.vcf.gz",
+        tbi="/output/{sample}.g.vcf.gz.tbi"
+    threads: config.get("threads", 4)
+    params:
+        java_opts=config.get("java_opts", "-Xmx8g"),
+        extra=config.get("haplotypecaller_extra", "")
+    log:
+        "/output/logs/{sample}_haplotypecaller.log"
+    shell:
+        """
+        gatk --java-options "{params.java_opts}" HaplotypeCaller \
+            -R {input.ref} \
+            -I {input.bam} \
+            -O {output.gvcf} \
+            -ERC GVCF \
+            --native-pair-hmm-threads {threads} \
+            {params.extra} \
+            2> {log}
+        """

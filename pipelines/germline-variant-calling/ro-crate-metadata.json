@@ -1,0 +1,126 @@
+{
+  "@context": "https://w3id.org/ro/crate/1.1/context",
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "about": {
+        "@id": "./"
+      },
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": [
+        "Dataset",
+        "SoftwareSourceCode",
+        "ComputationalWorkflow"
+      ],
+      "creator": [
+        {
+          "@id": "#author"
+        }
+      ],
+      "dateCreated": "2026-03-10",
+      "description": "Calls germline variants from BAM files using GATK HaplotypeCaller in GVCF mode. Supports multiple samples in parallel, producing per-sample g.VCF files ready for joint genotyping.",
+      "input": [
+        {
+          "@id": "#input-bam"
+        },
+        {
+          "@id": "#input-reference"
+        }
+      ],
+      "isBasedOn": {
+        "@id": ""
+      },
+      "keywords": [
+        "germline",
+        "variant-calling",
+        "GATK",
+        "HaplotypeCaller",
+        "GVCF",
+        "WGS",
+        "WES",
+        "human",
+        "SNP",
+        "indel"
+      ],
+      "license": {
+        "@id": "https://spdx.org/licenses/MIT"
+      },
+      "name": "germline-variant-calling",
+      "output": [
+        {
+          "@id": "#output-gvcf"
+        },
+        {
+          "@id": "#output-tbi"
+        }
+      ],
+      "programmingLanguage": {
+        "@id": "#snakemake"
+      },
+      "sdPublisher": {
+        "@id": "https://hub.autopipe.org"
+      },
+      "softwareRequirements": [
+        {
+          "@id": "#gatk4"
+        },
+        {
+          "@id": "#samtools"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "@id": "#author",
+      "@type": "Person",
+      "name": "khyeonmin"
+    },
+    {
+      "@id": "#snakemake",
+      "@type": "ComputerLanguage",
+      "name": "Snakemake",
+      "url": "https://snakemake.readthedocs.io"
+    },
+    {
+      "@id": "#gatk4",
+      "@type": "SoftwareApplication",
+      "name": "GATK4 HaplotypeCaller"
+    },
+    {
+      "@id": "#samtools",
+      "@type": "SoftwareApplication",
+      "name": "samtools"
+    },
+    {
+      "@id": "#input-bam",
+      "@type": "FormalParameter",
+      "encodingFormat": "application/x-bam",
+      "name": "bam"
+    },
+    {
+      "@id": "#input-reference",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/x-fasta",
+      "name": "reference fasta"
+    },
+    {
+      "@id": "#output-gvcf",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/x-vcf",
+      "name": "g.vcf.gz"
+    },
+    {
+      "@id": "#output-tbi",
+      "@type": "FormalParameter",
+      "encodingFormat": "application/octet-stream",
+      "name": "g.vcf.gz.tbi"
+    }
+  ],
+  "version": "1.0.0"
+}

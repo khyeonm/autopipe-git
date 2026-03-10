@@ -1,0 +1,15 @@
+# Required: list of sample names (without .bam extension)
+samples:
+  - NA12891_S1
+
+# Required: path to reference genome FASTA (mounted at runtime via /input)
+reference: "/input/hg19_ref/hg19_human.fa"
+
+# Java heap size for GATK
+java_opts: "-Xmx8g"
+
+# Number of threads for HaplotypeCaller native pair-HMM
+threads: 4
+
+# Optional: extra HaplotypeCaller arguments (e.g., "--dbsnp /input/dbsnp.vcf.gz")
+haplotypecaller_extra: ""
