@@ -1,0 +1,23 @@
+# Sample names (without extension)
+samples:
+  - 10k
+
+# Input h5ad files mapped by sample name
+input_files:
+  10k: /input/10k.h5ad
+
+# Preprocessing parameters
+target_sum: 10000        # normalize each cell to this total count
+n_top_genes: 2000        # number of highly variable genes
+n_pcs: 50                # number of PCA components
+
+# Clustering parameters
+n_neighbors: 15          # k for neighborhood graph
+leiden_resolution: 0.5   # Leiden resolution (higher = more clusters)
+
+# UMAP parameters
+umap_min_dist: 0.3
+umap_spread: 1.0
+
+# Resources
+threads: 4
