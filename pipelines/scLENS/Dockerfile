@@ -11,9 +11,10 @@ RUN mamba install -y -c conda-forge -c bioconda \
 RUN ln -sf /opt/conda/bin/bash /usr/bin/bash && \
     ln -sf /opt/conda/bin/bash /bin/sh
 
-# Install official Julia 1.11 binary (1.11+ supports 'public' keyword used by UMAP.jl)
-RUN wget -q -O /tmp/julia.tar.gz \
-    https://julialang-s3.julialang.org/bin/linux/x64/1.11/julia-1.11.4-linux-x86_64.tar.gz && \
+# Julia 1.11.4 (linux x86_64) - direct tarball download
+# Official release from julialang-s3.julialang.org (no shell pipe)
+RUN JULIA_URL="https://julialang-s3.julialang.org/bin/linux/x64/1.11/julia-1.11.4-linux-x86_64.tar.gz" && \
+    wget -q -O /tmp/julia.tar.gz "$JULIA_URL" && \
     tar -xzf /tmp/julia.tar.gz -C /usr/local --strip-components=1 && \
     rm /tmp/julia.tar.gz
 
