@@ -1,0 +1,140 @@
+{
+  "@context": "https://w3id.org/ro/crate/1.1/context",
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "about": {
+        "@id": "./"
+      },
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": [
+        "Dataset",
+        "SoftwareSourceCode",
+        "ComputationalWorkflow"
+      ],
+      "creator": [
+        {
+          "@id": "#author"
+        }
+      ],
+      "dateCreated": "2025-03-11",
+      "description": "Data-driven signal detection for unbiased scRNA-seq data analysis using scLENS (Single-cell Low-dimension Embedding using effective Noise Subtraction). Performs QC, dimensionality reduction via RMT-based noise filtering, and UMAP visualization.",
+      "input": [
+        {
+          "@id": "#input-csv"
+        }
+      ],
+      "isBasedOn": {
+        "@id": "https://github.com/Mathbiomed/scLENS"
+      },
+      "keywords": [
+        "scRNA-seq",
+        "dimensionality-reduction",
+        "single-cell",
+        "UMAP",
+        "PCA",
+        "noise-filtering",
+        "Julia"
+      ],
+      "license": {
+        "@id": "https://spdx.org/licenses/MIT"
+      },
+      "name": "scLENS",
+      "output": [
+        {
+          "@id": "#output-pca"
+        },
+        {
+          "@id": "#output-umap"
+        },
+        {
+          "@id": "#output-h5ad"
+        },
+        {
+          "@id": "#output-png"
+        }
+      ],
+      "programmingLanguage": {
+        "@id": "#snakemake"
+      },
+      "sdPublisher": {
+        "@id": "https://hub.autopipe.org"
+      },
+      "softwareRequirements": [
+        {
+          "@id": "#scLENS"
+        },
+        {
+          "@id": "#Julia"
+        },
+        {
+          "@id": "#UMAP"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "@id": "#author",
+      "@type": "Person",
+      "name": "Mathbiomed"
+    },
+    {
+      "@id": "#snakemake",
+      "@type": "ComputerLanguage",
+      "name": "Snakemake",
+      "url": "https://snakemake.readthedocs.io"
+    },
+    {
+      "@id": "#scLENS",
+      "@type": "SoftwareApplication",
+      "name": "scLENS"
+    },
+    {
+      "@id": "#Julia",
+      "@type": "SoftwareApplication",
+      "name": "Julia"
+    },
+    {
+      "@id": "#UMAP",
+      "@type": "SoftwareApplication",
+      "name": "UMAP.jl"
+    },
+    {
+      "@id": "#input-csv",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/csv",
+      "name": "scRNA-seq count matrix CSV"
+    },
+    {
+      "@id": "#output-pca",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/csv",
+      "name": "PCA embedding CSV"
+    },
+    {
+      "@id": "#output-umap",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/csv",
+      "name": "UMAP embedding CSV"
+    },
+    {
+      "@id": "#output-h5ad",
+      "@type": "FormalParameter",
+      "encodingFormat": "application/x-hdf5",
+      "name": "AnnData h5ad file"
+    },
+    {
+      "@id": "#output-png",
+      "@type": "FormalParameter",
+      "encodingFormat": "image/png",
+      "name": "UMAP plot PNG"
+    }
+  ],
+  "version": "1.0.0"
+}
