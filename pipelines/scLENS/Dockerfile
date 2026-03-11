@@ -12,8 +12,10 @@ RUN ln -sf /opt/conda/bin/bash /usr/bin/bash && \
     ln -sf /opt/conda/bin/bash /bin/sh
 
 # Install official Julia 1.11 binary (1.11+ supports 'public' keyword used by UMAP.jl)
-RUN curl -fsSL https://install.julialang.org | sh -s -- --yes --default-channel 1.11 && \
-    ln -sf /root/.juliaup/bin/julia /usr/local/bin/julia
+RUN curl -fsSL -o /tmp/julia.tar.gz \
+    https://julialang-s3.julialang.org/bin/linux/x64/1.11/julia-1.11.4-linux-x86_64.tar.gz && \
+    tar -xzf /tmp/julia.tar.gz -C /usr/local --strip-components=1 && \
+    rm /tmp/julia.tar.gz
 
 # Install uv for Python packages (anndata for h5ad output)
 RUN pip install uv
