@@ -7,13 +7,14 @@ using CSV
 using DataFrames
 using CairoMakie
 
-# Arguments: input_csv pca_out umap_out h5ad_out plot_out
+# Arguments: input_csv pca_out umap_out h5ad_out plot_out mpdist_out
 args = ARGS
-input_csv = args[1]
-pca_out   = args[2]
-umap_out  = args[3]
-h5ad_out  = args[4]
-plot_out  = args[5]
+input_csv  = args[1]
+pca_out    = args[2]
+umap_out   = args[3]
+h5ad_out   = args[4]
+plot_out   = args[5]
+mpdist_out = args[6]
 
 println("Loading data from: $input_csv")
 ndf = scLENS.read_file(input_csv)
@@ -26,6 +27,12 @@ println("Using device: $cur_dev")
 
 println("Running scLENS embedding...")
 sclens_embedding = scLENS.sclens(pre_df, device_=cur_dev)
+
+# Plot MP distribution (RMT eigenvalue distribution)
+println("Saving MP distribution plot -> $mpdist_out")
+CairoMakie.activate!(type = "png")
+mpdist_panel = scLENS.plot_mpdist(sclens_embedding)
+save(mpdist_out, mpdist_panel)
 
 println("Applying UMAP...")
 scLENS.apply_umap!(sclens_embedding)
@@ -43,8 +50,7 @@ println("Saving h5ad -> $h5ad_out")
 scLENS.save_anndata(h5ad_out, sclens_embedding)
 
 # Save UMAP plot
-println("Saving plot -> $plot_out")
-CairoMakie.activate!(type = "png")
+println("Saving UMAP plot -> $plot_out")
 panel = scLENS.plot_embedding(sclens_embedding, pre_df.cell)
 save(plot_out, panel)
 
