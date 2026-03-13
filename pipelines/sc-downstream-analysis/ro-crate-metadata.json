@@ -1,0 +1,125 @@
+{
+  "@context": "https://w3id.org/ro/crate/1.1/context",
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "about": {
+        "@id": "./"
+      },
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": [
+        "Dataset",
+        "SoftwareSourceCode",
+        "ComputationalWorkflow"
+      ],
+      "creator": [
+        {
+          "@id": "#author"
+        }
+      ],
+      "dateCreated": "2026-03-10",
+      "description": "Single-cell RNA-seq downstream analysis pipeline: preprocessing (normalize, log-transform, HVG selection, scaling, PCA), Leiden clustering, and UMAP visualization. Outputs processed h5ad, UMAP PNG, and cluster assignment CSV.",
+      "input": [
+        {
+          "@id": "#input-h5ad"
+        }
+      ],
+      "keywords": [
+        "single-cell",
+        "scRNA-seq",
+        "clustering",
+        "leiden",
+        "umap",
+        "scanpy",
+        "downstream-analysis"
+      ],
+      "license": {
+        "@id": "https://spdx.org/licenses/MIT"
+      },
+      "name": "sc-downstream-analysis",
+      "output": [
+        {
+          "@id": "#output-h5ad"
+        },
+        {
+          "@id": "#output-umap-png"
+        },
+        {
+          "@id": "#output-clusters-csv"
+        }
+      ],
+      "programmingLanguage": {
+        "@id": "#snakemake"
+      },
+      "softwareRequirements": [
+        {
+          "@id": "#scanpy"
+        },
+        {
+          "@id": "#leidenalg"
+        },
+        {
+          "@id": "#umap-learn"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "@id": "#author",
+      "@type": "Person",
+      "name": ""
+    },
+    {
+      "@id": "#snakemake",
+      "@type": "ComputerLanguage",
+      "name": "Snakemake",
+      "url": "https://snakemake.readthedocs.io"
+    },
+    {
+      "@id": "#scanpy",
+      "@type": "SoftwareApplication",
+      "name": "scanpy"
+    },
+    {
+      "@id": "#leidenalg",
+      "@type": "SoftwareApplication",
+      "name": "leidenalg"
+    },
+    {
+      "@id": "#umap-learn",
+      "@type": "SoftwareApplication",
+      "name": "umap-learn"
+    },
+    {
+      "@id": "#input-h5ad",
+      "@type": "FormalParameter",
+      "encodingFormat": "application/x-hdf5",
+      "name": "h5ad"
+    },
+    {
+      "@id": "#output-h5ad",
+      "@type": "FormalParameter",
+      "encodingFormat": "application/x-hdf5",
+      "name": "processed h5ad"
+    },
+    {
+      "@id": "#output-umap-png",
+      "@type": "FormalParameter",
+      "encodingFormat": "image/png",
+      "name": "UMAP PNG"
+    },
+    {
+      "@id": "#output-clusters-csv",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/csv",
+      "name": "cluster assignments CSV"
+    }
+  ],
+  "version": "1.0.0"
+}
