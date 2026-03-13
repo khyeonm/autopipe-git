@@ -1,0 +1,8 @@
+# Required: path to input CSV file (mounted at /input at runtime)
+input_csv: "/input/Z8eq.csv"
+
+# Optional: number of threads (default: 8)
+threads: 8
+
+# Optional: device to use for computation (cpu or gpu)
+device: "cpu"
