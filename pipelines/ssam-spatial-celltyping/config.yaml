@@ -1,0 +1,24 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# SSAM pipeline config — smFISH Allen dataset (CSV mode)
+# Uses pnucolab/ssam API: github.com/pnucolab/ssam
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Spot table CSV path (inside container: /input/...)
+csv: "/input/s3_spot_table.csv"
+
+# KDE bandwidth in micrometers (2.5 µm = ~10 µm FWTM for Gaussian kernel)
+bandwidth: 2.5
+
+# Expression threshold — local maxima with norm below this are discarded
+# Raised from 0.2 → 0.5 to reduce vector count and avoid OOM during clustering
+threshold: 0.5
+
+# Output map width in pixels
+map_width: 1000
+
+# Leiden clustering resolution (higher → more clusters)
+resolution: 0.6
+
+# Number of CPU threads
+threads: 4
+
