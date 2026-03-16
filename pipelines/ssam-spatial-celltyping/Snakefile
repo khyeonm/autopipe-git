@@ -1,0 +1,34 @@
+configfile: "config.yaml"
+
+rule all:
+    input:
+        "/output/celltype_map.png",
+        "/output/kde_map.png",
+        "/output/celltype_abundance.csv"
+
+rule run_ssam:
+    output:
+        ct_map    = "/output/celltype_map.png",
+        kde_map   = "/output/kde_map.png",
+        abundance = "/output/celltype_abundance.csv"
+    threads: config["threads"]
+    params:
+        csv        = config["csv"],
+        bandwidth  = config["bandwidth"],
+        threshold  = config["threshold"],
+        map_width  = config["map_width"],
+        resolution = config["resolution"],
+    log:
+        "/output/ssam.log"
+    shell:
+        """
+        python /pipeline/scripts/run_ssam.py \
+            --csv {params.csv} \
+            --output-dir /output \
+            --bandwidth {params.bandwidth} \
+            --threshold {params.threshold} \
+            --map-width {params.map_width} \
+            --threads {threads} \
+            --resolution {params.resolution} \
+            2>&1 | tee {log}
+        """
