@@ -8,7 +8,7 @@ Identifies high-frequency aptamer candidate sequences from paired-end FASTQ file
 2. **Selection Filtering** — Extract insert regions flanked by primer sequences
 3. **1st Sort Filtering** — Narrow to intermediate structural region (40 bp between-length)
 4. **2nd Sort Filtering** — Extract the core 20 bp variable region
-5. **Aggregation & Ranking** — Parallel counting, deduplication, and top-N output
+5. **Aggregation & Ranking** — Parallel counting, deduplication, and full ranked output
 
 ## Inputs
 
@@ -21,10 +21,10 @@ Identifies high-frequency aptamer candidate sequences from paired-end FASTQ file
 
 | File | Description |
 |------|-------------|
-| `sort2_top.tsv` | **Final aptamer candidates** ranked by frequency |
-| `sort1_top.tsv` | Top sequences after 1st Sort |
-| `selection_top.tsv` | Top sequences after Selection |
-| `joined_top.tsv` | Top sequences after Join |
+| `sort2_all.tsv` | **All unique final aptamer candidates**, ranked by frequency (rank, sequence, count) |
+| `sort1_all.tsv` | All unique sequences after 1st Sort, ranked by frequency |
+| `selection_all.tsv` | All unique sequences after Selection, ranked by frequency |
+| `joined_all.tsv` | All unique sequences after Join, ranked by frequency |
 | `summary.txt` | Per-stage read counts |
 
 ## Configuration (`config.yaml`)
@@ -40,7 +40,6 @@ Identifies high-frequency aptamer candidate sequences from paired-end FASTQ file
 | `s2_read1/2` | — | 2nd Sort primer sequences |
 | `s2_length` | 20 | Required between-length for 2nd Sort |
 | `max_mismatches` | 1 | Max mismatches in pattern matching |
-| `top_n` | 10 | Number of top candidates output |
 | `chunk_size` | 10000 | Records per parallel chunk |
 | `threads` | 4 | Worker threads |
 
