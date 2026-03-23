@@ -2,6 +2,12 @@
 
 Identifies high-frequency aptamer candidate sequences from paired-end FASTQ files produced by SELEX experiments.
 
+## What's New in v1.1.0
+
+- Intermediate TSV files (`joined_all.tsv`, `selection_all.tsv`, `sort1_all.tsv`, `sort2_all.tsv`) are no longer written to disk.
+- All final aptamer candidates are now consolidated into a single **`results.tsv`** file (equivalent to the previous `sort2_all.tsv`).
+- Per-stage statistics are still recorded in `summary.txt`.
+
 ## Pipeline Stages
 
 1. **Join** — Overlap-based read joining (short/long library modes)
@@ -21,10 +27,7 @@ Identifies high-frequency aptamer candidate sequences from paired-end FASTQ file
 
 | File | Description |
 |------|-------------|
-| `sort2_all.tsv` | **All unique final aptamer candidates**, ranked by frequency (rank, sequence, count) |
-| `sort1_all.tsv` | All unique sequences after 1st Sort, ranked by frequency |
-| `selection_all.tsv` | All unique sequences after Selection, ranked by frequency |
-| `joined_all.tsv` | All unique sequences after Join, ranked by frequency |
+| `results.tsv` | **All unique final aptamer candidates**, ranked by frequency (rank, sequence, count) |
 | `summary.txt` | Per-stage read counts |
 
 ## Configuration (`config.yaml`)

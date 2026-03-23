@@ -2,6 +2,7 @@
 """
 AptaSelect: High-frequency aptamer candidate identification from paired-end FASTQ files.
 Pipeline stages: Join -> Selection Filtering -> 1st Sort Filtering -> 2nd Sort Filtering -> Aggregation & Ranking
+Only the final 2nd Sort results are written to results.tsv.
 """
 
 import argparse
@@ -210,21 +211,17 @@ def main():
             total_sort1.update(s1c)
             total_sort2.update(s2c)
 
-    def write_tsv(counter, path, label):
-        # All unique sequences, sorted by count descending, ranked from 1
-        ranked = counter.most_common()
-        with open(path, "w") as f:
-            f.write("rank\tsequence\tcount\n")
-            for rank, (seq, cnt) in enumerate(ranked, 1):
-                f.write(f"{rank}\t{seq}\t{cnt}\n")
-        print(f"[AptaSelect] {label}: {sum(counter.values())} total, "
-              f"{len(counter)} unique -> all written to {path}", flush=True)
+    # Write only the final 2nd Sort results to results.tsv
+    results_path = os.path.join(args.outdir, "results.tsv")
+    ranked = total_sort2.most_common()
+    with open(results_path, "w") as f:
+        f.write("rank\tsequence\tcount\n")
+        for rank, (seq, cnt) in enumerate(ranked, 1):
+            f.write(f"{rank}\t{seq}\t{cnt}\n")
+    print(f"[AptaSelect] 2nd Sort (final aptamers): {sum(total_sort2.values())} total, "
+          f"{len(total_sort2)} unique -> all written to {results_path}", flush=True)
 
-    write_tsv(total_joined, os.path.join(args.outdir, "joined_all.tsv"),    "Join")
-    write_tsv(total_sel,    os.path.join(args.outdir, "selection_all.tsv"), "Selection")
-    write_tsv(total_sort1,  os.path.join(args.outdir, "sort1_all.tsv"),     "1st Sort")
-    write_tsv(total_sort2,  os.path.join(args.outdir, "sort2_all.tsv"),     "2nd Sort (final aptamers)")
-
+    # Summary
     with open(os.path.join(args.outdir, "summary.txt"), "w") as f:
         f.write("AptaSelect Summary\n")
         f.write("==================\n")
