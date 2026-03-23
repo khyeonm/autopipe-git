@@ -4,56 +4,54 @@ Identifies high-frequency aptamer candidate sequences from paired-end FASTQ file
 
 ## Pipeline Stages
 
-1. **Join** — Overlapping paired-end reads are merged using Hamming-distance scoring. Supports both short-library (`IS_SHORT=true`) and long-library (`IS_SHORT=false`) modes.
-2. **Selection Filtering** — Extracts full insert regions bounded by `SEL_READ1` / `SEL_READ2` primer patterns (fuzzy matching, ≤ `MAX_MISMATCHES`).
-3. **1st Sort Filtering** — Narrows to intermediate structural regions flanked by `S1_READ1` / `S1_READ2`, enforcing a fixed between-pattern length of `S1_LENGTH` bp.
-4. **2nd Sort Filtering** — Extracts the core variable region bounded by `S2_READ1` / `S2_READ2`, enforcing `S2_LENGTH` bp between patterns.
-5. **Aggregation & Ranking** — Counts across all parallel chunks are summed and the top `TOP_N` sequences are written to the final output.
+1. **Join** — Overlap-based read joining (short/long library modes)
+2. **Selection Filtering** — Extract insert regions flanked by primer sequences
+3. **1st Sort Filtering** — Narrow to intermediate structural region (40 bp between-length)
+4. **2nd Sort Filtering** — Extract the core 20 bp variable region
+5. **Aggregation & Ranking** — Parallel counting, deduplication, and top-N output
 
 ## Inputs
 
-| File | Description |
-|------|-------------|
-| `read1.fastq.gz` | Read 1 FASTQ (plain or gzipped) |
-| `read2.fastq.gz` | Read 2 FASTQ (plain or gzipped) |
+| Parameter | Description |
+|-----------|-------------|
+| `read1` | Read 1 FASTQ file (plain or `.gz`) |
+| `read2` | Read 2 FASTQ file (plain or `.gz`) |
 
 ## Outputs
 
 | File | Description |
 |------|-------------|
-| `aptaselect_results.tsv` | Tab-separated: rank, sequence, count |
+| `sort2_top.tsv` | **Final aptamer candidates** ranked by frequency |
+| `sort1_top.tsv` | Top sequences after 1st Sort |
+| `selection_top.tsv` | Top sequences after Selection |
+| `joined_top.tsv` | Top sequences after Join |
+| `summary.txt` | Per-stage read counts |
 
 ## Configuration (`config.yaml`)
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `min_overlap` | 6 | Minimum overlap bp for join |
-| `pct_diff` | 8 | Max mismatch % in overlap |
-| `is_short` | `true` | Short library mode |
-| `sel_read1` | `CCACTTCTCCTTCCATCCTAAAC` | Selection left pattern |
-| `sel_read2` | `GAGTAGTTTGGAGGGTTGTCTG` | Selection right pattern |
-| `s1_read1` | `TCCTAAAC` | 1st Sort left pattern |
-| `s1_read2` | `GAGTAGTT` | 1st Sort right pattern |
-| `s1_length` | 40 | Between-pattern length for 1st Sort |
-| `s2_read1` | `TCTCTCTCTC` | 2nd Sort left pattern |
-| `s2_read2` | `GAGAGAGAGA` | 2nd Sort right pattern |
-| `s2_length` | 20 | Between-pattern length for 2nd Sort |
-| `max_mismatches` | 1 | Max mismatches per pattern |
-| `top_n` | 10 | Top sequences to report |
-| `chunk_size` | 10000 | Records per parallel processing chunk |
+| Key | Default | Description |
+|-----|---------|-------------|
+| `min_overlap` | 6 | Minimum overlap bp for Join |
+| `pct_diff` | 8.0 | Max mismatch % in overlap |
+| `is_short` | true | Short library mode |
+| `sel_read1/2` | — | Selection primer sequences |
+| `s1_read1/2` | — | 1st Sort primer sequences |
+| `s1_length` | 40 | Required between-length for 1st Sort |
+| `s2_read1/2` | — | 2nd Sort primer sequences |
+| `s2_length` | 20 | Required between-length for 2nd Sort |
+| `max_mismatches` | 1 | Max mismatches in pattern matching |
+| `top_n` | 10 | Number of top candidates output |
+| `chunk_size` | 10000 | Records per parallel chunk |
+| `threads` | 4 | Worker threads |
 
-## Running
+## Run
 
 ```bash
-# Build
-docker build -t aptaselect:1.0.0 .
+docker build -t aptaselect .
 
-# Run
 docker run --rm \
-  -v /path/to/fastq:/input:ro \
+  -v /path/to/data:/input:ro \
   -v /path/to/output:/output \
-  aptaselect:1.0.0 \
-  snakemake --cores 4
+  aptaselect \
+  snakemake --cores 4 --snakefile /pipeline/Snakefile
 ```
-
-Input FASTQ files must be named `read1.fastq.gz` and `read2.fastq.gz` (or update `r1`/`r2` in `config.yaml`).

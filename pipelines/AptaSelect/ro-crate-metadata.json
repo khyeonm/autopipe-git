@@ -13,75 +13,137 @@
     },
     {
       "@id": "./",
-      "@type": "Dataset",
-      "creator": [],
-      "description": "Identifies high-frequency aptamer candidate sequences from paired-end FASTQ files produced by SELEX experiments. Five-stage pipeline: Join, Selection Filtering, 1st Sort Filtering, 2nd Sort Filtering, and Aggregation & Ranking.",
+      "@type": [
+        "Dataset",
+        "SoftwareSourceCode",
+        "ComputationalWorkflow"
+      ],
+      "creator": [
+        {
+          "@id": "#author"
+        }
+      ],
+      "dateCreated": "2026-03-23",
+      "description": "Identifies high-frequency aptamer candidate sequences from paired-end FASTQ files produced by SELEX experiments. The pipeline performs overlap-based read joining, nested pattern-based filtering (Selection → 1st Sort → 2nd Sort), and outputs ranked aptamer candidates by frequency.",
       "input": [
         {
-          "@id": "#r1_fastq"
+          "@id": "#input-read1"
         },
         {
-          "@id": "#r2_fastq"
+          "@id": "#input-read2"
         }
       ],
       "keywords": [
         "aptamer",
         "SELEX",
-        "paired-end",
+        "bioinformatics",
         "FASTQ",
         "aptamer-selection",
-        "genomics",
-        "bioinformatics",
-        "sequence-analysis",
-        "high-throughput-sequencing"
+        "paired-end",
+        "pattern-matching"
       ],
-      "license": "https://spdx.org/licenses/MIT",
+      "license": {
+        "@id": "https://spdx.org/licenses/MIT"
+      },
       "name": "AptaSelect",
       "output": [
         {
-          "@id": "#aptaselect_results"
+          "@id": "#output-sort2"
+        },
+        {
+          "@id": "#output-sort1"
+        },
+        {
+          "@id": "#output-selection"
+        },
+        {
+          "@id": "#output-joined"
+        },
+        {
+          "@id": "#output-summary"
         }
       ],
       "programmingLanguage": {
         "@id": "#snakemake"
       },
+      "sdPublisher": {
+        "@id": "https://hub.autopipe.org"
+      },
       "softwareRequirements": [
         {
-          "@id": "#snakemake"
+          "@id": "#python"
         },
         {
-          "@id": "#python"
+          "@id": "#snakemake-tool"
         }
       ],
       "version": "1.0.0"
     },
     {
+      "@id": "#author",
+      "@type": "Person",
+      "name": "User"
+    },
+    {
       "@id": "#snakemake",
-      "@type": "SoftwareApplication",
-      "name": "Snakemake"
+      "@type": "ComputerLanguage",
+      "name": "Snakemake",
+      "url": "https://snakemake.readthedocs.io"
     },
     {
       "@id": "#python",
       "@type": "SoftwareApplication",
-      "name": "Python 3.11"
+      "name": "Python",
+      "url": "https://www.python.org",
+      "version": "3.11"
     },
     {
-      "@id": "#r1_fastq",
+      "@id": "#snakemake-tool",
+      "@type": "SoftwareApplication",
+      "name": "Snakemake",
+      "url": "https://snakemake.readthedocs.io"
+    },
+    {
+      "@id": "#input-read1",
       "@type": "FormalParameter",
-      "encodingFormat": "text/fastq",
+      "encodingFormat": "text/plain",
       "name": "Read 1 FASTQ"
     },
     {
-      "@id": "#r2_fastq",
+      "@id": "#input-read2",
       "@type": "FormalParameter",
-      "encodingFormat": "text/fastq",
+      "encodingFormat": "text/plain",
       "name": "Read 2 FASTQ"
     },
     {
-      "@id": "#aptaselect_results",
+      "@id": "#output-sort2",
       "@type": "FormalParameter",
       "encodingFormat": "text/tab-separated-values",
-      "name": "AptaSelect Results (ranked aptamer candidates)"
+      "name": "Final aptamer candidates (2nd Sort top N)"
+    },
+    {
+      "@id": "#output-sort1",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/tab-separated-values",
+      "name": "1st Sort top N sequences"
+    },
+    {
+      "@id": "#output-selection",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/tab-separated-values",
+      "name": "Selection filtering top N sequences"
+    },
+    {
+      "@id": "#output-joined",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/tab-separated-values",
+      "name": "Joined reads top N sequences"
+    },
+    {
+      "@id": "#output-summary",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/plain",
+      "name": "Per-stage summary statistics"
     }
   ],
   "version": "1.0.0"
