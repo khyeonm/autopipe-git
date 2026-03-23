@@ -1,0 +1,28 @@
+# ─── Input files (Docker mount points) ───────────────────────────────────────
+read1: "/input/test_1.fq"   # Path to Read 1 FASTQ (plain or .gz)
+read2: "/input/test_2.fq"   # Path to Read 2 FASTQ (plain or .gz)
+
+# ─── Join parameters ──────────────────────────────────────────────────────────
+min_overlap: 6        # Minimum overlap length (bp)
+pct_diff: 8.0         # Maximum mismatch % allowed in overlap region
+is_short: "true"      # true = short library (insert < read length)
+
+# ─── Selection filtering (Stage 2) ───────────────────────────────────────────
+sel_read1: "CCACTTCTCCTTCCATCCTAAAC"
+sel_read2: "GAGTAGTTTGGAGGGTTGTCTG"
+
+# ─── 1st Sort filtering (Stage 3) ────────────────────────────────────────────
+s1_read1: "TCCTAAAC"
+s1_read2: "GAGTAGTT"
+s1_length: 40         # Required length between S1 patterns (bp)
+
+# ─── 2nd Sort filtering (Stage 4) ────────────────────────────────────────────
+s2_read1: "TCTCTCTCTC"
+s2_read2: "GAGAGAGAGA"
+s2_length: 20         # Required length between S2 patterns (bp)
+
+# ─── General ──────────────────────────────────────────────────────────────────
+max_mismatches: 1     # Max mismatches allowed in all pattern matching
+top_n: 10             # Number of top aptamer candidates to output
+chunk_size: 10000     # Records per parallel processing chunk
+threads: 4            # Parallel worker threads
