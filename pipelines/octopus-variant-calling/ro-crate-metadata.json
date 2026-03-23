@@ -1,0 +1,58 @@
+{
+  "@context": "https://w3id.org/ro/crate/1.1/context",
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "about": { "@id": "./" },
+      "conformsTo": { "@id": "https://w3id.org/ro/crate/1.1" }
+    },
+    {
+      "@id": "./",
+      "@type": ["Dataset", "SoftwareSourceCode", "ComputationalWorkflow"],
+      "creator": [{ "@id": "#author" }],
+      "dateCreated": "2026-03-22",
+      "description": "A Snakemake pipeline for calling SNPs, indels, and complex variants from paired-end WGS data using Octopus, a haplotype-aware Bayesian variant caller with particle filtering. Includes read QC, trimming, alignment, and variant filtering.",
+      "input": [
+        { "@id": "#input-fastq-r1" },
+        { "@id": "#input-fastq-r2" },
+        { "@id": "#input-reference" }
+      ],
+      "isBasedOn": { "@id": "https://github.com/luntergroup/octopus" },
+      "keywords": ["variant-calling", "octopus", "SNP", "indel", "WGS", "haplotype", "Bayesian", "VCF"],
+      "license": { "@id": "https://spdx.org/licenses/MIT" },
+      "name": "octopus-variant-calling",
+      "output": [
+        { "@id": "#output-vcf" },
+        { "@id": "#output-stats" },
+        { "@id": "#output-fastqc" }
+      ],
+      "programmingLanguage": { "@id": "#snakemake" },
+      "sdPublisher": { "@id": "https://hub.autopipe.org" },
+      "softwareRequirements": [
+        { "@id": "#octopus" },
+        { "@id": "#bwa-mem2" },
+        { "@id": "#samtools" },
+        { "@id": "#bcftools" },
+        { "@id": "#fastp" },
+        { "@id": "#fastqc" }
+      ],
+      "version": "1.0.0"
+    },
+    { "@id": "#author", "@type": "Person", "name": "AutoPipe" },
+    { "@id": "#snakemake", "@type": "ComputerLanguage", "name": "Snakemake", "url": "https://snakemake.readthedocs.io" },
+    { "@id": "#octopus", "@type": "SoftwareApplication", "name": "Octopus", "url": "https://github.com/luntergroup/octopus" },
+    { "@id": "#bwa-mem2", "@type": "SoftwareApplication", "name": "BWA-MEM2" },
+    { "@id": "#samtools", "@type": "SoftwareApplication", "name": "samtools" },
+    { "@id": "#bcftools", "@type": "SoftwareApplication", "name": "bcftools" },
+    { "@id": "#fastp", "@type": "SoftwareApplication", "name": "fastp" },
+    { "@id": "#fastqc", "@type": "SoftwareApplication", "name": "FastQC" },
+    { "@id": "#input-fastq-r1", "@type": "FormalParameter", "encodingFormat": "application/gzip", "name": "Paired-end FASTQ R1" },
+    { "@id": "#input-fastq-r2", "@type": "FormalParameter", "encodingFormat": "application/gzip", "name": "Paired-end FASTQ R2" },
+    { "@id": "#input-reference", "@type": "FormalParameter", "encodingFormat": "text/x-fasta", "name": "Reference genome FASTA" },
+    { "@id": "#output-vcf", "@type": "FormalParameter", "encodingFormat": "text/x-vcf", "name": "Filtered variant calls VCF" },
+    { "@id": "#output-stats", "@type": "FormalParameter", "encodingFormat": "text/plain", "name": "Variant statistics" },
+    { "@id": "#output-fastqc", "@type": "FormalParameter", "encodingFormat": "text/html", "name": "FastQC quality report" }
+  ],
+  "version": "1.0.0"
+}

@@ -1,0 +1,15 @@
+# Required: path to input FASTQ files (mounted at /input at runtime)
+sample_r1: "/input/sample_R1.fastq.gz"
+sample_r2: "/input/sample_R2.fastq.gz"
+
+# Required: reference genome FASTA (mounted at /input at runtime)
+reference: "/input/reference.fa"
+
+# Optional: sample name (used for output file naming and read group)
+sample_name: "sample"
+
+# Optional: number of threads (default: 4)
+threads: 4
+
+# Optional: minimum variant quality score for filtering (default: 20)
+min_qual: 20
