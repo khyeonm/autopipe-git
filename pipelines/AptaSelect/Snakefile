@@ -1,0 +1,41 @@
+configfile: "config.yaml"
+
+rule all:
+    input:
+        "/output/aptaselect_results.tsv"
+
+rule aptaselect:
+    """
+    AptaSelect: all 5 stages (Join → Selection → 1st Sort → 2nd Sort → Aggregation).
+    Processes paired-end FASTQ in parallel chunks and writes top-N aptamer candidates.
+    """
+    input:
+        fq1 = config["fastq1"],
+        fq2 = config["fastq2"]
+    output:
+        tsv = "/output/aptaselect_results.tsv"
+    threads: config.get("threads", 4)
+    log:
+        "/output/aptaselect.log"
+    shell:
+        """
+        python /pipeline/scripts/aptaselect.py \
+            --fastq1 {input.fq1} \
+            --fastq2 {input.fq2} \
+            --output {output.tsv} \
+            --min_overlap   {config[min_overlap]} \
+            --pct_diff      {config[pct_diff]} \
+            --sel_read1     {config[sel_read1]} \
+            --sel_read2     {config[sel_read2]} \
+            --s1_read1      {config[s1_read1]} \
+            --s1_read2      {config[s1_read2]} \
+            --s1_length     {config[s1_length]} \
+            --s2_read1      {config[s2_read1]} \
+            --s2_read2      {config[s2_read2]} \
+            --s2_length     {config[s2_length]} \
+            --max_mismatches {config[max_mismatches]} \
+            --top_n         {config[top_n]} \
+            --chunk_size    {config[chunk_size]} \
+            --threads       {threads} \
+        2> {log}
+        """

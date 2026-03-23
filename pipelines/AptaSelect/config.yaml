@@ -1,0 +1,27 @@
+# ── Input files (mounted at /input at runtime) ──────────────────────────────
+fastq1: "/input/sample_R1.fastq.gz"   # FASTQ1 (read 1)
+fastq2: "/input/sample_R2.fastq.gz"   # FASTQ2 (read 2)
+
+# ── Stage 1: Join parameters ─────────────────────────────────────────────────
+min_overlap: 6          # minimum overlap length (bp)
+pct_diff: 8.0           # maximum mismatch % in overlap region
+
+# ── Stage 2: Selection filtering ─────────────────────────────────────────────
+sel_read1: "CCACTTCTCCTTCCATCCTAAAC"
+sel_read2: "GAGTAGTTTGGAGGGTTGTCTG"
+
+# ── Stage 3: 1st Sort filtering ──────────────────────────────────────────────
+s1_read1: "TCCTAAAC"
+s1_read2: "GAGTAGTT"
+s1_length: 40           # required length between patterns (bp)
+
+# ── Stage 4: 2nd Sort filtering ──────────────────────────────────────────────
+s2_read1: "TCTCTCTCTC"
+s2_read2: "GAGAGAGAGA"
+s2_length: 20           # required length between patterns (bp)
+
+# ── Shared settings ───────────────────────────────────────────────────────────
+max_mismatches: 1       # max mismatches allowed in all pattern matching steps
+top_n: 10               # number of top candidates to report
+chunk_size: 10000       # reads per parallel chunk
+threads: 4              # parallel worker threads
