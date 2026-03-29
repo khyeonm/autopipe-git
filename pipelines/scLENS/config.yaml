@@ -1,5 +1,5 @@
 # Required: path to input CSV file (mounted at /input at runtime)
-input_csv: "/input/Z8eq.csv"
+input_csv: "/input/Z8eq_l.csv"
 
 # Optional: number of threads (default: 8)
 threads: 8

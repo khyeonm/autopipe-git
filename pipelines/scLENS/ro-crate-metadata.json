@@ -24,7 +24,7 @@
         }
       ],
       "dateCreated": "2025-03-11",
-      "description": "Data-driven signal detection for unbiased scRNA-seq data analysis using scLENS (Single-cell Low-dimension Embedding using effective Noise Subtraction). Performs QC, dimensionality reduction via RMT-based noise filtering, MP distribution plotting, and UMAP visualization.",
+      "description": "Data-driven signal detection for unbiased scRNA-seq data analysis using scLENS (Single-cell Low-dimension Embedding using effective Noise Subtraction). Performs QC, dimensionality reduction via RMT-based noise filtering, and UMAP visualization.",
       "input": [
         {
           "@id": "#input-csv"
@@ -40,7 +40,6 @@
         "UMAP",
         "PCA",
         "noise-filtering",
-        "RMT",
         "Julia"
       ],
       "license": {
@@ -59,9 +58,6 @@
         },
         {
           "@id": "#output-png"
-        },
-        {
-          "@id": "#output-mpdist"
         }
       ],
       "programmingLanguage": {
@@ -81,7 +77,7 @@
           "@id": "#UMAP"
         }
       ],
-      "version": "1.0.0"
+      "version": "1.0.1"
     },
     {
       "@id": "#author",
@@ -138,13 +134,7 @@
       "@type": "FormalParameter",
       "encodingFormat": "image/png",
       "name": "UMAP plot PNG"
-    },
-    {
-      "@id": "#output-mpdist",
-      "@type": "FormalParameter",
-      "encodingFormat": "image/png",
-      "name": "MP distribution plot PNG"
     }
   ],
-  "version": "1.0.0"
+  "version": "1.0.1"
 }

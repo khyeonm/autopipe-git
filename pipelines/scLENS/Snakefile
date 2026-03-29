@@ -6,18 +6,18 @@ rule all:
         "/output/umap.csv",
         "/output/test_data.h5ad",
         "/output/umap_dist.png",
-        "/output/mpdist.png"
+        "/output/mp_dist.png"
 
 rule run_sclens:
     """Run scLENS dimensionality reduction on scRNA-seq CSV data."""
     input:
         csv=config["input_csv"]
     output:
-        pca    = "/output/pca.csv",
-        umap   = "/output/umap.csv",
-        h5ad   = "/output/test_data.h5ad",
-        plot   = "/output/umap_dist.png",
-        mpdist = "/output/mpdist.png"
+        pca   = "/output/pca.csv",
+        umap  = "/output/umap.csv",
+        h5ad  = "/output/test_data.h5ad",
+        plot  = "/output/umap_dist.png",
+        mp_plot = "/output/mp_dist.png"
     threads: config.get("threads", 8)
     log:
         "/output/sclens.log"
@@ -29,6 +29,6 @@ rule run_sclens:
             {output.umap} \
             {output.h5ad} \
             {output.plot} \
-            {output.mpdist} \
+            {output.mp_plot} \
             2>&1 | tee {log}
         """
