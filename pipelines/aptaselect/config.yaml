@@ -1,0 +1,41 @@
+# AptaSelect Pipeline Configuration
+# Identifies high-frequency aptamer candidates from paired-end SELEX FASTQ files
+
+# Required: sample name (base name, expects {sample}_1.fq and {sample}_2.fq in /input)
+samples:
+  - test
+
+# --- Stage 1: Join Parameters ---
+# Minimum overlap length in bp
+min_overlap: 6
+# Maximum mismatch percentage in overlap region
+pct_diff: 8
+# Short library mode: insert shorter than read length
+is_short: true
+
+# --- Stage 2: Selection Filtering Patterns ---
+sel_read1: "CCACTTCTCCTTCCATCCTAAAC"
+sel_read2: "GAGTAGTTTGGAGGGTTGTCTG"
+
+# --- Stage 3: 1st Sort Filtering Patterns ---
+s1_read1: "TCCTAAAC"
+s1_read2: "GAGTAGTT"
+s1_length: 40
+
+# --- Stage 4: 2nd Sort Filtering Patterns ---
+s2_read1: "TCTCTCTCTC"
+s2_read2: "GAGAGAGAGA"
+s2_length: 20
+
+# --- Pattern Matching ---
+# Maximum mismatches allowed for all pattern matching
+max_mismatches: 1
+
+# --- Stage 5: Aggregation & Ranking ---
+# Number of top sequences to output
+top_n: 10
+# Records per parallel chunk
+chunk_size: 10000
+
+# Threading
+threads: 4

@@ -1,0 +1,121 @@
+{
+  "@context": "https://w3id.org/ro/crate/1.1/context",
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "about": {
+        "@id": "./"
+      },
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": [
+        "Dataset",
+        "SoftwareSourceCode",
+        "ComputationalWorkflow"
+      ],
+      "creator": [
+        {
+          "@id": "#author"
+        }
+      ],
+      "dateCreated": "2026-03-28",
+      "description": "AptaSelect identifies high-frequency aptamer candidate sequences from paired-end FASTQ files produced by SELEX experiments. The pipeline joins paired-end reads, applies sequential pattern-based filtering (Selection, 1st Sort, 2nd Sort), and ranks candidates by frequency.",
+      "input": [
+        {
+          "@id": "#input-r1-fastq"
+        },
+        {
+          "@id": "#input-r2-fastq"
+        }
+      ],
+      "isBasedOn": {
+        "@id": ""
+      },
+      "keywords": [
+        "aptamer",
+        "SELEX",
+        "paired-end",
+        "sequence-analysis",
+        "pattern-matching"
+      ],
+      "license": {
+        "@id": "https://spdx.org/licenses/MIT"
+      },
+      "name": "aptaselect",
+      "output": [
+        {
+          "@id": "#output-candidates-tsv"
+        },
+        {
+          "@id": "#output-stats"
+        }
+      ],
+      "programmingLanguage": {
+        "@id": "#snakemake"
+      },
+      "sdPublisher": {
+        "@id": "https://hub.autopipe.org"
+      },
+      "softwareRequirements": [
+        {
+          "@id": "#python"
+        },
+        {
+          "@id": "#snakemake-tool"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "@id": "#author",
+      "@type": "Person",
+      "name": "khyeonmin"
+    },
+    {
+      "@id": "#snakemake",
+      "@type": "ComputerLanguage",
+      "name": "Snakemake",
+      "url": "https://snakemake.readthedocs.io"
+    },
+    {
+      "@id": "#python",
+      "@type": "SoftwareApplication",
+      "name": "Python 3.11"
+    },
+    {
+      "@id": "#snakemake-tool",
+      "@type": "SoftwareApplication",
+      "name": "snakemake-minimal"
+    },
+    {
+      "@id": "#input-r1-fastq",
+      "@type": "FormalParameter",
+      "encodingFormat": "application/x-fastq",
+      "name": "Read 1 FASTQ"
+    },
+    {
+      "@id": "#input-r2-fastq",
+      "@type": "FormalParameter",
+      "encodingFormat": "application/x-fastq",
+      "name": "Read 2 FASTQ"
+    },
+    {
+      "@id": "#output-candidates-tsv",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/tab-separated-values",
+      "name": "Top aptamer candidates TSV"
+    },
+    {
+      "@id": "#output-stats",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/plain",
+      "name": "Pipeline statistics report"
+    }
+  ],
+  "version": "1.0.0"
+}
