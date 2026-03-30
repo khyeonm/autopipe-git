@@ -23,14 +23,14 @@
           "@id": "#author"
         }
       ],
-      "dateCreated": "2026-03-28",
-      "description": "AptaSelect identifies high-frequency aptamer candidate sequences from paired-end FASTQ files produced by SELEX experiments. The pipeline joins paired-end reads, applies sequential pattern-based filtering (Selection, 1st Sort, 2nd Sort), and ranks candidates by frequency.",
+      "dateCreated": "2026-03-30",
+      "description": "AptaSelect identifies high-frequency aptamer candidate sequences from paired-end FASTQ files produced by SELEX experiments. The pipeline joins paired reads, applies sequential pattern filtering (Selection, 1st Sort, 2nd Sort), and ranks sequences by frequency.",
       "input": [
         {
-          "@id": "#input-r1-fastq"
+          "@id": "#input-read1"
         },
         {
-          "@id": "#input-r2-fastq"
+          "@id": "#input-read2"
         }
       ],
       "isBasedOn": {
@@ -41,7 +41,7 @@
         "SELEX",
         "paired-end",
         "sequence-analysis",
-        "pattern-matching"
+        "aptamer-selection"
       ],
       "license": {
         "@id": "https://spdx.org/licenses/MIT"
@@ -49,7 +49,7 @@
       "name": "aptaselect",
       "output": [
         {
-          "@id": "#output-candidates-tsv"
+          "@id": "#output-tsv"
         },
         {
           "@id": "#output-stats"
@@ -61,15 +61,8 @@
       "sdPublisher": {
         "@id": "https://hub.autopipe.org"
       },
-      "softwareRequirements": [
-        {
-          "@id": "#python"
-        },
-        {
-          "@id": "#snakemake-tool"
-        }
-      ],
-      "version": "1.0.0"
+      "softwareRequirements": [],
+      "version": "1.0.1"
     },
     {
       "@id": "#author",
@@ -83,39 +76,29 @@
       "url": "https://snakemake.readthedocs.io"
     },
     {
-      "@id": "#python",
-      "@type": "SoftwareApplication",
-      "name": "Python 3.11"
-    },
-    {
-      "@id": "#snakemake-tool",
-      "@type": "SoftwareApplication",
-      "name": "snakemake-minimal"
-    },
-    {
-      "@id": "#input-r1-fastq",
+      "@id": "#input-read1",
       "@type": "FormalParameter",
       "encodingFormat": "application/x-fastq",
       "name": "Read 1 FASTQ"
     },
     {
-      "@id": "#input-r2-fastq",
+      "@id": "#input-read2",
       "@type": "FormalParameter",
       "encodingFormat": "application/x-fastq",
       "name": "Read 2 FASTQ"
     },
     {
-      "@id": "#output-candidates-tsv",
+      "@id": "#output-tsv",
       "@type": "FormalParameter",
       "encodingFormat": "text/tab-separated-values",
-      "name": "Top aptamer candidates TSV"
+      "name": "Top sequences TSV"
     },
     {
       "@id": "#output-stats",
       "@type": "FormalParameter",
-      "encodingFormat": "text/plain",
-      "name": "Pipeline statistics report"
+      "encodingFormat": "application/json",
+      "name": "Pipeline statistics JSON"
     }
   ],
-  "version": "1.0.0"
+  "version": "1.0.1"
 }

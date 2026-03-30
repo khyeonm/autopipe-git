@@ -1,41 +1,30 @@
 # AptaSelect Pipeline Configuration
-# Identifies high-frequency aptamer candidates from paired-end SELEX FASTQ files
+# Identifies high-frequency aptamer candidate sequences from paired-end SELEX FASTQ files
 
-# Required: sample name (base name, expects {sample}_1.fq and {sample}_2.fq in /input)
-samples:
-  - test
+# ---- Input files (filenames only, mounted at /input) ----
+read1: "test_1.fq"        # Read 1 FASTQ file
+read2: "test_2.fq"        # Read 2 FASTQ file
 
-# --- Stage 1: Join Parameters ---
-# Minimum overlap length in bp
-min_overlap: 6
-# Maximum mismatch percentage in overlap region
-pct_diff: 8
-# Short library mode: insert shorter than read length
-is_short: true
+# ---- Join parameters ----
+min_overlap: 6             # Minimum overlap length in bp
+pct_diff: 8                # Maximum mismatch % in overlap region
+is_short: true             # Short library mode (insert shorter than read length)
 
-# --- Stage 2: Selection Filtering Patterns ---
-sel_read1: "CCACTTCTCCTTCCATCCTAAAC"
-sel_read2: "GAGTAGTTTGGAGGGTTGTCTG"
+# ---- Selection Filtering patterns ----
+sel_read1: "CCACTTCTCCTTCCATCCTAAAC"   # Selection left pattern
+sel_read2: "GAGTAGTTTGGAGGGTTGTCTG"    # Selection right pattern
 
-# --- Stage 3: 1st Sort Filtering Patterns ---
-s1_read1: "TCCTAAAC"
-s1_read2: "GAGTAGTT"
-s1_length: 40
+# ---- 1st Sort Filtering patterns ----
+s1_read1: "TCCTAAAC"      # 1st Sort left pattern (suffix of sel_read1)
+s1_read2: "GAGTAGTT"      # 1st Sort right pattern (prefix of sel_read2)
+s1_length: 40              # Required length between S1 patterns in bp
 
-# --- Stage 4: 2nd Sort Filtering Patterns ---
-s2_read1: "TCTCTCTCTC"
-s2_read2: "GAGAGAGAGA"
-s2_length: 20
+# ---- 2nd Sort Filtering patterns ----
+s2_read1: "TCTCTCTCTC"    # 2nd Sort left pattern
+s2_read2: "GAGAGAGAGA"    # 2nd Sort right pattern
+s2_length: 20              # Required length between S2 patterns in bp
 
-# --- Pattern Matching ---
-# Maximum mismatches allowed for all pattern matching
-max_mismatches: 1
-
-# --- Stage 5: Aggregation & Ranking ---
-# Number of top sequences to output
-top_n: 10
-# Records per parallel chunk
-chunk_size: 10000
-
-# Threading
-threads: 4
+# ---- General parameters ----
+max_mismatches: 1          # Max mismatches for all pattern matching
+top_n: 10                  # Number of top sequences to output
+chunk_size: 10000          # Records per processing chunk

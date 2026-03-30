@@ -1,41 +1,39 @@
 # AptaSelect
 
-Identifies high-frequency aptamer candidate sequences from paired-end FASTQ files produced by SELEX experiments.
+AptaSelect identifies high-frequency aptamer candidate sequences from paired-end FASTQ files produced by SELEX experiments.
 
 ## Pipeline Stages
 
-1. **Join** — Reverse-complements Read 2, finds optimal overlap, merges paired reads using quality scores
-2. **Selection Filtering** — Locates selection adapter patterns and extracts the enclosed region
-3. **1st Sort Filtering** — Validates the extracted sequence contains 1st sort patterns with correct spacing (40 bp)
-4. **2nd Sort Filtering** — Validates the extracted sequence contains 2nd sort patterns with correct spacing (20 bp)
-5. **Aggregation & Ranking** — Counts identical sequences and outputs the top N candidates
+1. **Join** — Merges paired-end reads by finding optimal overlap using Hamming distance and Phred quality scores
+2. **Selection Filtering** — Extracts sequences flanked by selection adapter patterns
+3. **1st Sort Filtering** — Validates extracted sequences contain 1st sort patterns with required spacing (40 bp)
+4. **2nd Sort Filtering** — Validates sequences contain 2nd sort patterns with required spacing (20 bp)
+5. **Aggregation & Ranking** — Counts unique sequences and reports the top N candidates
 
 ## Required Inputs
 
-- `{sample}_1.fq` — Read 1 FASTQ file
-- `{sample}_2.fq` — Read 2 FASTQ file
+- `test_1.fq` — Read 1 paired-end FASTQ file
+- `test_2.fq` — Read 2 paired-end FASTQ file
 
-Place input files in the input directory. Sample names are configured in `config.yaml`.
+## Outputs
 
-## Expected Outputs
-
-- `{sample}_top_candidates.tsv` — Ranked aptamer candidates with counts
-- `{sample}_pipeline_stats.txt` — Statistics from all pipeline stages
+- `aptaselect_top_sequences.tsv` — Ranked list of top aptamer candidate sequences with counts
+- `aptaselect_stats.json` — Pipeline statistics (reads processed, pass rates per stage)
 
 ## Configuration
 
-Edit `config.yaml` to adjust parameters including overlap settings, adapter patterns, sort pattern lengths, mismatch tolerance, and the number of top candidates to report.
+Edit `config.yaml` to adjust parameters including adapter patterns, overlap settings, mismatch tolerance, and the number of top sequences to report.
 
 ## Running
 
 ```bash
-# Build the Docker image
-docker build -t autopipe-aptaselect /path/to/aptaselect/
+# Build
+docker build -t autopipe-aptaselect .
 
-# Run the pipeline
+# Run
 docker run --rm \
   -v /path/to/input:/input:ro \
   -v /path/to/output:/output \
   autopipe-aptaselect \
-  snakemake --cores 4 -s /pipeline/Snakefile --directory /output
+  snakemake --cores 1 -s /pipeline/Snakefile
 ```

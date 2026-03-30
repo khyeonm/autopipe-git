@@ -5,6 +5,7 @@ RUN conda install -y -c bioconda -c conda-forge \
     snakemake-minimal \
     bash \
     python=3.11 \
+    pyyaml \
     && conda clean -afy
 
 # Replace system bash with conda bash (prevents GLIBC mismatch)

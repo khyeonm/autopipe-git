@@ -1,121 +1,56 @@
 configfile: "config.yaml"
 
 import json
-import os
-
-SAMPLES = config["samples"]
-
-# Write a JSON config file for the Python scripts to consume
-def write_script_config(output_path):
-    """Write pipeline parameters as JSON for Python scripts."""
-    script_config = {
-        "min_overlap": config.get("min_overlap", 6),
-        "pct_diff": config.get("pct_diff", 8),
-        "is_short": config.get("is_short", True),
-        "sel_read1": config.get("sel_read1", "CCACTTCTCCTTCCATCCTAAAC"),
-        "sel_read2": config.get("sel_read2", "GAGTAGTTTGGAGGGTTGTCTG"),
-        "s1_read1": config.get("s1_read1", "TCCTAAAC"),
-        "s1_read2": config.get("s1_read2", "GAGTAGTT"),
-        "s1_length": config.get("s1_length", 40),
-        "s2_read1": config.get("s2_read1", "TCTCTCTCTC"),
-        "s2_read2": config.get("s2_read2", "GAGAGAGAGA"),
-        "s2_length": config.get("s2_length", 20),
-        "max_mismatches": config.get("max_mismatches", 1),
-        "top_n": config.get("top_n", 10),
-        "chunk_size": config.get("chunk_size", 10000),
-    }
-    with open(output_path, 'w') as f:
-        json.dump(script_config, f, indent=2)
-
-# Create the script config at workflow start
-SCRIPT_CONFIG = "/pipeline/script_config.json"
-write_script_config(SCRIPT_CONFIG)
 
 rule all:
     input:
-        expand("/output/{sample}_all_sequences.tsv", sample=SAMPLES),
-        expand("/output/{sample}_top_candidates.tsv", sample=SAMPLES),
-        expand("/output/{sample}_pipeline_stats.txt", sample=SAMPLES)
+        "/output/aptaselect_top_sequences.tsv",
+        "/output/aptaselect_stats.json"
 
-rule stage1_join:
-    """Stage 1: Join paired-end reads by finding best overlap."""
-    input:
-        r1="/input/{sample}_1.fq",
-        r2="/input/{sample}_2.fq"
+rule prepare_config:
+    """Convert YAML config parameters to JSON for the Python script."""
     output:
-        joined=temp("/output/{sample}_joined.txt")
+        temp("/output/run_config.json")
+    run:
+        run_config = {
+            "min_overlap": config["min_overlap"],
+            "pct_diff": config["pct_diff"],
+            "is_short": config["is_short"],
+            "sel_read1": config["sel_read1"],
+            "sel_read2": config["sel_read2"],
+            "s1_read1": config["s1_read1"],
+            "s1_read2": config["s1_read2"],
+            "s1_length": config["s1_length"],
+            "s2_read1": config["s2_read1"],
+            "s2_read2": config["s2_read2"],
+            "s2_length": config["s2_length"],
+            "max_mismatches": config["max_mismatches"],
+            "top_n": config["top_n"],
+        }
+        with open(output[0], 'w') as f:
+            json.dump(run_config, f, indent=2)
+
+rule aptaselect:
+    """Run the AptaSelect pipeline: Join, Filter, Aggregate & Rank."""
+    input:
+        read1="/input/" + config["read1"],
+        read2="/input/" + config["read2"],
+        run_config="/output/run_config.json"
+    output:
+        tsv="/output/aptaselect_top_sequences.tsv",
+        stats="/output/aptaselect_stats.json"
     log:
-        "/output/logs/{sample}_stage1_join.log"
-    shell:
-        """
-        python /pipeline/scripts/stage1_join.py \
-            {input.r1} {input.r2} {output.joined} {SCRIPT_CONFIG} \
-            2>&1 | tee {log}
-        """
-
-rule stage2_4_filter:
-    """Stages 2-4: Selection filtering, 1st Sort, 2nd Sort validation."""
-    input:
-        joined=rules.stage1_join.output.joined
-    output:
-        filtered=temp("/output/{sample}_filtered.txt")
-    log:
-        "/output/logs/{sample}_stage2_4_filter.log"
-    shell:
-        """
-        python /pipeline/scripts/stage2_4_filter.py \
-            {input.joined} {output.filtered} {SCRIPT_CONFIG} \
-            2>&1 | tee {log}
-        """
-
-rule stage5_aggregate:
-    """Stage 5: Aggregate identical sequences and rank by frequency."""
-    input:
-        filtered=rules.stage2_4_filter.output.filtered
-    output:
-        all_seqs="/output/{sample}_all_sequences.tsv",
-        ranked="/output/{sample}_top_candidates.tsv"
-    log:
-        "/output/logs/{sample}_stage5_aggregate.log"
-    shell:
-        """
-        python /pipeline/scripts/stage5_aggregate.py \
-            {input.filtered} {output.all_seqs} {output.ranked} {SCRIPT_CONFIG} \
-            2>&1 | tee {log}
-        """
-
-rule collect_stats:
-    """Collect statistics from all stages into a single report."""
-    input:
-        candidates=rules.stage5_aggregate.output.ranked
-    output:
-        stats="/output/{sample}_pipeline_stats.txt"
+        "/output/logs/aptaselect.log"
     params:
-        sample="{sample}"
+        chunk_size=config.get("chunk_size", 10000)
     shell:
         """
-        echo "=== AptaSelect Pipeline Statistics ===" > {output.stats}
-        echo "Sample: {params.sample}" >> {output.stats}
-        echo "" >> {output.stats}
-        
-        echo "--- Stage 1: Join ---" >> {output.stats}
-        if [ -f /output/{params.sample}_joined.txt.stats ]; then
-            cat /output/{params.sample}_joined.txt.stats >> {output.stats}
-        fi
-        echo "" >> {output.stats}
-        
-        echo "--- Stages 2-4: Filtering ---" >> {output.stats}
-        if [ -f /output/{params.sample}_filtered.txt.stats ]; then
-            cat /output/{params.sample}_filtered.txt.stats >> {output.stats}
-        fi
-        echo "" >> {output.stats}
-        
-        echo "--- Stage 5: Aggregation ---" >> {output.stats}
-        if [ -f /output/{params.sample}_top_candidates.tsv.stats ]; then
-            cat /output/{params.sample}_top_candidates.tsv.stats >> {output.stats}
-        fi
-        echo "" >> {output.stats}
-        
-        echo "--- Top Candidates ---" >> {output.stats}
-        cat {input.candidates} >> {output.stats}
+        python /pipeline/scripts/aptaselect.py \
+            --read1 {input.read1} \
+            --read2 {input.read2} \
+            --output {output.tsv} \
+            --stats {output.stats} \
+            --config {input.run_config} \
+            --chunk-size {params.chunk_size} \
+            2>&1 | tee {log}
         """
