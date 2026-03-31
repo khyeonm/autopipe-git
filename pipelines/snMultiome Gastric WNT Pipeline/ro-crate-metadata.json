@@ -170,5 +170,6 @@
       "encodingFormat": "text/csv",
       "name": "Differential analysis results (CSV)"
     }
-  ]
+  ],
+  "version": "1.0.0"
 }
