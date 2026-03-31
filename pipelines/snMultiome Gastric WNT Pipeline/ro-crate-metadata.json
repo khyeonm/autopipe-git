@@ -1,0 +1,174 @@
+{
+  "@context": "https://w3id.org/ro/crate/1.1/context",
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "about": {
+        "@id": "./"
+      },
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": [
+        "Dataset",
+        "SoftwareSourceCode",
+        "ComputationalWorkflow"
+      ],
+      "creator": [
+        {
+          "@id": "#author"
+        }
+      ],
+      "dateCreated": "2026-03-31",
+      "description": "A comprehensive 10X Genomics snMultiome (joint snRNA-seq + scATAC-seq) analysis pipeline for reproducing the results from 'Epithelial WNT secretion drives niche escape of developing gastric cancer'. The pipeline processes wild-type (RZ) and KRAS-mutant (RZK) mouse gastric tissue samples through QC filtering, MACS2 peak calling, SCTransform + TF-IDF normalisation, SCT-based integration, UMAP clustering, differential expression (MAST), differential accessibility (LR test), KRAS signaling gene set overlap, and JASPAR2020 TF motif enrichment analysis. Generates publication-quality figures including UMAP plots, DotPlots, dittoBarPlots, FeaturePlots, and motif enrichment bar plots.",
+      "input": [
+        {
+          "@id": "#input-h5"
+        },
+        {
+          "@id": "#input-fragments"
+        },
+        {
+          "@id": "#input-metrics"
+        }
+      ],
+      "isBasedOn": {
+        "@id": ""
+      },
+      "keywords": [
+        "snMultiome",
+        "10X Genomics",
+        "scRNA-seq",
+        "scATAC-seq",
+        "Seurat",
+        "Signac",
+        "MACS2",
+        "gastric cancer",
+        "WNT signaling",
+        "KRAS",
+        "mouse",
+        "multiome",
+        "chromatin accessibility",
+        "motif enrichment",
+        "JASPAR",
+        "differential expression",
+        "differential accessibility"
+      ],
+      "license": {
+        "@id": "https://spdx.org/licenses/MIT"
+      },
+      "name": "snMultiome Gastric WNT Pipeline",
+      "output": [
+        {
+          "@id": "#output-rds"
+        },
+        {
+          "@id": "#output-pdf"
+        },
+        {
+          "@id": "#output-csv"
+        }
+      ],
+      "programmingLanguage": {
+        "@id": "#snakemake"
+      },
+      "sdPublisher": {
+        "@id": "https://hub.autopipe.org"
+      },
+      "softwareRequirements": [
+        {
+          "@id": "#seurat"
+        },
+        {
+          "@id": "#signac"
+        },
+        {
+          "@id": "#macs2"
+        },
+        {
+          "@id": "#chromvar"
+        },
+        {
+          "@id": "#mast"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "@id": "#author",
+      "@type": "Person",
+      "name": "PNU COLab"
+    },
+    {
+      "@id": "#snakemake",
+      "@type": "ComputerLanguage",
+      "name": "Snakemake",
+      "url": "https://snakemake.readthedocs.io"
+    },
+    {
+      "@id": "#seurat",
+      "@type": "SoftwareApplication",
+      "name": "Seurat"
+    },
+    {
+      "@id": "#signac",
+      "@type": "SoftwareApplication",
+      "name": "Signac"
+    },
+    {
+      "@id": "#macs2",
+      "@type": "SoftwareApplication",
+      "name": "MACS2"
+    },
+    {
+      "@id": "#chromvar",
+      "@type": "SoftwareApplication",
+      "name": "chromVAR"
+    },
+    {
+      "@id": "#mast",
+      "@type": "SoftwareApplication",
+      "name": "MAST"
+    },
+    {
+      "@id": "#input-h5",
+      "@type": "FormalParameter",
+      "encodingFormat": "application/x-hdf5",
+      "name": "filtered_feature_bc_matrix.h5"
+    },
+    {
+      "@id": "#input-fragments",
+      "@type": "FormalParameter",
+      "encodingFormat": "application/gzip",
+      "name": "atac_fragments.tsv.gz"
+    },
+    {
+      "@id": "#input-metrics",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/csv",
+      "name": "per_barcode_metrics.csv"
+    },
+    {
+      "@id": "#output-rds",
+      "@type": "FormalParameter",
+      "encodingFormat": "application/x-rds",
+      "name": "Seurat RDS objects"
+    },
+    {
+      "@id": "#output-pdf",
+      "@type": "FormalParameter",
+      "encodingFormat": "application/pdf",
+      "name": "Publication figures (PDF)"
+    },
+    {
+      "@id": "#output-csv",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/csv",
+      "name": "Differential analysis results (CSV)"
+    }
+  ]
+}

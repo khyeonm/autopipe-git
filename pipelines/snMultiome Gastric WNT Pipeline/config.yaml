@@ -1,0 +1,130 @@
+# ==============================================================================
+# config.yaml — 10X snMultiome Analysis Pipeline (Gastric WNT / RZ vs RZK)
+# Reproduces: "Epithelial WNT secretion drives niche escape of developing
+#              gastric cancer"
+# ==============================================================================
+
+# --- Species ----------------------------------------------------------------
+species: "mouse"              # "mouse" or "human"
+genome: "mm10"                # genome build (mm10 or hg38)
+
+# --- Input files (mounted at /input at runtime) -----------------------------
+# Wild-type sample
+wild_type:
+  h5_file: "/input/Mouse_RZ_WEN/filtered_feature_bc_matrix.h5"
+  fragment_file: "/input/Mouse_RZ_WEN/atac_fragments.tsv.gz"
+  meta_file: "/input/Mouse_RZ_WEN/per_barcode_metrics.csv"
+
+# Mutant sample (KRAS-mutant)
+mutant:
+  h5_file: "/input/Mouse_RZK_WEN/filtered_feature_bc_matrix.h5"
+  fragment_file: "/input/Mouse_RZK_WEN/atac_fragments.tsv.gz"
+  meta_file: "/input/Mouse_RZK_WEN/per_barcode_metrics.csv"
+
+# --- QC thresholds ----------------------------------------------------------
+qc:
+  max_nCount_ATAC: 100000
+  min_nCount_ATAC: 1000
+  max_nCount_RNA: 25000
+  min_nCount_RNA: 1000
+  max_nucleosome_signal: 2
+  min_TSS_enrichment: 1
+  max_percent_mt: 15
+
+# --- Normalisation & Clustering ---------------------------------------------
+n_variable_features: 2000     # for FindVariableFeatures (RNA)
+n_pcs: 30                     # PCA dimensions for UMAP / clustering
+cluster_resolution_initial: 0.3  # first-pass clustering
+cluster_resolution_refined: 0.6  # second-pass to split Pit / Pre-Pit
+
+# --- MACS2 peak calling ----------------------------------------------------
+macs2_path: "/opt/conda/envs/pipeline/bin/macs2"
+
+# --- Differential expression ------------------------------------------------
+de_test: "MAST"               # test for FindMarkers (RNA)
+de_padj_cutoff: 0.01
+de_log2fc_cutoff: 1.0
+
+# --- Differential accessibility ---------------------------------------------
+da_min_pct: 0.05
+da_logfc_threshold: 0.1
+da_test: "LR"
+da_latent_var: "atac_peak_region_fragments"
+da_padj_cutoff: 0.005         # for selecting features for motif enrichment
+
+# --- Motif enrichment -------------------------------------------------------
+jaspar_collection: "CORE"
+jaspar_tax_group: "vertebrates"
+motif_padj_cutoff: 0.05
+
+# --- Marker genes (for DotPlot / FeaturePlots) ------------------------------
+marker_genes:
+  - "Lgr5"
+  - "Glipr1"
+  - "Cd44"
+  - "Cftr"
+  - "Muc6"
+  - "Mki67"
+  - "Foxm1"
+  - "Hmgb2"
+  - "Top2a"
+  - "Smc2"
+  - "Gkn1"
+  - "Tff1"
+  - "Gkn2"
+  - "Muc5ac"
+  - "Wnt7b"
+
+# --- Wnt family genes (for VlnPlot) ----------------------------------------
+wnt_family_genes:
+  - "Wnt1"
+  - "Wnt2"
+  - "Wnt2b"
+  - "Wnt3"
+  - "Wnt3a"
+  - "Wnt4"
+  - "Wnt5a"
+  - "Wnt5b"
+  - "Wnt6"
+  - "Wnt7a"
+  - "Wnt7b"
+  - "Wnt8a"
+  - "Wnt8b"
+  - "Wnt9a"
+  - "Wnt9b"
+  - "Wnt10a"
+  - "Wnt10b"
+  - "Wnt11"
+  - "Wnt16"
+
+# --- Cluster → cell-type mapping (resolution 0.3) --------------------------
+cluster_labels:
+  "0": "Neck"
+  "1": "Lgr5+"
+  "2": "SPEM"
+  "3": "Wnt7+"
+  "4": "Proliferating"
+  "5": "Pre-Pit"
+  "6": "Pit"
+
+# --- Colour palettes -------------------------------------------------------
+cluster_colours:
+  "Neck":          "#8936EF"
+  "Lgr5+":         "#F2CA19"
+  "SPEM":          "#FF00BD"
+  "Wnt7+":         "#E11845"
+  "Proliferating": "#0057E9"
+  "Pre-Pit":       "#87E911"
+  "Pit":           "#018300"
+
+# --- Wnt7b peak regions for accessibility tests -----------------------------
+wnt7b_peak_regions:
+  - "chr15-85568400-85569900"
+  - "chr15-85574150-85575200"
+
+# --- Parallelism -----------------------------------------------------------
+threads: 20
+max_memory_gb: 80
+
+# --- Output -----------------------------------------------------------------
+output_dir: "/output"
