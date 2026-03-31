@@ -1,0 +1,170 @@
+# ===========================================================================
+#  Snakefile — 10X snMultiome (Seurat + Signac) Pipeline
+#  Reproduces: "Epithelial WNT secretion drives niche escape
+#               of developing gastric cancer"
+# ===========================================================================
+configfile: "config.yaml"
+
+OUTPUT = config["output_dir"]
+
+rule all:
+    input:
+        # Step 1: QC objects
+        OUTPUT + "/rds/wild_qc.rds",
+        OUTPUT + "/rds/mutant_qc.rds",
+        # Step 2: MACS2 peak-called objects
+        OUTPUT + "/rds/wild_macs2.rds",
+        OUTPUT + "/rds/mutant_macs2.rds",
+        # Step 3: Normalized objects
+        OUTPUT + "/rds/wild_normalized.rds",
+        OUTPUT + "/rds/mutant_normalized.rds",
+        # Step 4: Integrated + clustered object
+        OUTPUT + "/rds/integrated_clustered.rds",
+        # Step 5: Visualization plots
+        OUTPUT + "/plots/fig3A_UMAP.pdf",
+        OUTPUT + "/plots/fig3B_dotplot.pdf",
+        OUTPUT + "/plots/fig3C_dittobarplot.pdf",
+        OUTPUT + "/plots/fig3D_Wnt7b_feature.pdf",
+        OUTPUT + "/plots/figS3A_featureplots.pdf",
+        OUTPUT + "/plots/figS3B_wnt_family_violin.pdf",
+        # Step 6: DEG results
+        OUTPUT + "/tables/DEG_scMAST.csv",
+        OUTPUT + "/tables/KRAS_signaling_overlap.csv",
+        # Step 7: Motif enrichment
+        OUTPUT + "/plots/fig3I_motifs_Wnt_vs_Lgr5_mutant.pdf",
+        OUTPUT + "/plots/fig3I_motifs_Wnt_vs_Lgr5_wildtype.pdf",
+        OUTPUT + "/tables/DA_peaks_Wnt_vs_Lgr5_mutant.csv",
+        OUTPUT + "/tables/DA_peaks_Wnt_vs_Lgr5_wildtype.csv",
+        OUTPUT + "/tables/enriched_motifs_mutant.csv",
+        OUTPUT + "/tables/enriched_motifs_wildtype.csv"
+
+# ── Step 1: Load data & QC filtering ─────────────────────────────────────
+rule load_and_qc:
+    input:
+        wt_h5   = config["wild_type"]["h5"],
+        mut_h5  = config["mutant"]["h5"]
+    output:
+        wild_rds   = OUTPUT + "/rds/wild_qc.rds",
+        mutant_rds = OUTPUT + "/rds/mutant_qc.rds",
+        qc_plots   = OUTPUT + "/plots/qc_violin_plots.pdf"
+    log:
+        OUTPUT + "/logs/01_load_and_qc.log"
+    threads: 1
+    shell:
+        """
+        Rscript /pipeline/scripts/01_load_and_qc.R \
+            --config /pipeline/config.yaml \
+            > {log} 2>&1
+        """
+
+# ── Step 2: MACS2 peak calling ───────────────────────────────────────────
+rule macs2_peaks:
+    input:
+        wild_rds   = rules.load_and_qc.output.wild_rds,
+        mutant_rds = rules.load_and_qc.output.mutant_rds
+    output:
+        wild_rds   = OUTPUT + "/rds/wild_macs2.rds",
+        mutant_rds = OUTPUT + "/rds/mutant_macs2.rds"
+    log:
+        OUTPUT + "/logs/02_macs2_peaks.log"
+    threads: 1
+    shell:
+        """
+        Rscript /pipeline/scripts/02_macs2_peaks.R \
+            --config /pipeline/config.yaml \
+            > {log} 2>&1
+        """
+
+# ── Step 3: Normalize RNA (SCT + LogNorm) & ATAC (TF-IDF + SVD) ─────────
+rule normalize:
+    input:
+        wild_rds   = rules.macs2_peaks.output.wild_rds,
+        mutant_rds = rules.macs2_peaks.output.mutant_rds
+    output:
+        wild_rds   = OUTPUT + "/rds/wild_normalized.rds",
+        mutant_rds = OUTPUT + "/rds/mutant_normalized.rds"
+    log:
+        OUTPUT + "/logs/03_normalize.log"
+    threads: 1
+    shell:
+        """
+        Rscript /pipeline/scripts/03_normalize.R \
+            --config /pipeline/config.yaml \
+            > {log} 2>&1
+        """
+
+# ── Step 4: Integrate samples (SCT anchors) & cluster ────────────────────
+rule integrate_cluster:
+    input:
+        wild_rds   = rules.normalize.output.wild_rds,
+        mutant_rds = rules.normalize.output.mutant_rds
+    output:
+        combined_rds = OUTPUT + "/rds/integrated_clustered.rds"
+    log:
+        OUTPUT + "/logs/04_integrate_cluster.log"
+    threads: 1
+    shell:
+        """
+        Rscript /pipeline/scripts/04_integrate_cluster.R \
+            --config /pipeline/config.yaml \
+            > {log} 2>&1
+        """
+
+# ── Step 5: Generate publication figures ──────────────────────────────────
+rule visualization:
+    input:
+        combined_rds = rules.integrate_cluster.output.combined_rds
+    output:
+        fig3a = OUTPUT + "/plots/fig3A_UMAP.pdf",
+        fig3b = OUTPUT + "/plots/fig3B_dotplot.pdf",
+        fig3c = OUTPUT + "/plots/fig3C_dittobarplot.pdf",
+        fig3d = OUTPUT + "/plots/fig3D_Wnt7b_feature.pdf",
+        figs3a = OUTPUT + "/plots/figS3A_featureplots.pdf",
+        figs3b = OUTPUT + "/plots/figS3B_wnt_family_violin.pdf"
+    log:
+        OUTPUT + "/logs/05_visualization.log"
+    threads: 1
+    shell:
+        """
+        Rscript /pipeline/scripts/05_visualization.R \
+            --config /pipeline/config.yaml \
+            > {log} 2>&1
+        """
+
+# ── Step 6: Differential gene expression (MAST) ──────────────────────────
+rule differential:
+    input:
+        combined_rds = rules.integrate_cluster.output.combined_rds
+    output:
+        deg_csv     = OUTPUT + "/tables/DEG_scMAST.csv",
+        kras_csv    = OUTPUT + "/tables/KRAS_signaling_overlap.csv"
+    log:
+        OUTPUT + "/logs/06_differential.log"
+    threads: 1
+    shell:
+        """
+        Rscript /pipeline/scripts/06_differential.R \
+            --config /pipeline/config.yaml \
+            > {log} 2>&1
+        """
+
+# ── Step 7: DA peaks + motif enrichment (Wnt7+ vs Lgr5+) ────────────────
+rule motif_enrichment:
+    input:
+        combined_rds = rules.integrate_cluster.output.combined_rds
+    output:
+        motif_mut_pdf = OUTPUT + "/plots/fig3I_motifs_Wnt_vs_Lgr5_mutant.pdf",
+        motif_wt_pdf  = OUTPUT + "/plots/fig3I_motifs_Wnt_vs_Lgr5_wildtype.pdf",
+        da_mut_csv    = OUTPUT + "/tables/DA_peaks_Wnt_vs_Lgr5_mutant.csv",
+        da_wt_csv     = OUTPUT + "/tables/DA_peaks_Wnt_vs_Lgr5_wildtype.csv",
+        motif_mut_csv = OUTPUT + "/tables/enriched_motifs_mutant.csv",
+        motif_wt_csv  = OUTPUT + "/tables/enriched_motifs_wildtype.csv"
+    log:
+        OUTPUT + "/logs/07_motif_enrichment.log"
+    threads: 1
+    shell:
+        """
+        Rscript /pipeline/scripts/07_motif_enrichment.R \
+            --config /pipeline/config.yaml \
+            > {log} 2>&1
+        """

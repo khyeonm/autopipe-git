@@ -1,0 +1,126 @@
+# ===========================================================================
+#  config.yaml — 10X snMultiome (Seurat + Signac) Pipeline
+#  Paper: "Epithelial WNT secretion drives niche escape of developing gastric cancer"
+# ===========================================================================
+
+# ── Sample information ──────────────────────────────────────────────────────
+# Each sample needs: h5 matrix, ATAC fragments (.tsv.gz + .tbi), barcode metrics
+wild_type:
+  h5:        "/input/Mouse_RZ_WEN/filtered_feature_bc_matrix.h5"
+  fragments: "/input/Mouse_RZ_WEN/atac_fragments.tsv.gz"
+  metadata:  "/input/Mouse_RZ_WEN/per_barcode_metrics.csv"
+  label:     "Wild_type"
+
+mutant:
+  h5:        "/input/Mouse_RZK_WEN/filtered_feature_bc_matrix.h5"
+  fragments: "/input/Mouse_RZK_WEN/atac_fragments.tsv.gz"
+  metadata:  "/input/Mouse_RZK_WEN/per_barcode_metrics.csv"
+  label:     "Mutant"
+
+# ── Species & genome ───────────────────────────────────────────────────────
+species: "mouse"          # "mouse" or "human"
+
+# ── QC thresholds ──────────────────────────────────────────────────────────
+qc:
+  nCount_ATAC_max: 100000
+  nCount_RNA_max:  25000
+  nCount_ATAC_min: 1000
+  nCount_RNA_min:  1000
+  nucleosome_signal_max: 2
+  TSS_enrichment_min:    1
+  percent_mt_max:        15
+
+# ── Processing parameters ─────────────────────────────────────────────────
+sct_nfeatures: 2000                 # variable features for RNA normalization
+pca_dims: 30                        # PCA dimensions for UMAP/clustering
+clustering_resolution_initial: 0.3  # initial resolution (6 clusters)
+clustering_resolution_refine:  0.6  # refined resolution (splits Pit cells)
+
+# ── Differential expression ───────────────────────────────────────────────
+de_test: "MAST"
+de_pval_cutoff: 0.01
+de_log2fc_cutoff: 1
+
+# ── Differential accessibility ────────────────────────────────────────────
+da_min_pct: 0.05
+da_logfc_threshold: 0.1
+da_test: "LR"
+da_pval_cutoff: 0.005          # for motif enrichment input
+motif_padj_cutoff: 0.05
+
+# ── Multiprocessing ───────────────────────────────────────────────────────
+workers: 20
+future_ram_gb: 80
+seed: 1234
+
+# ── MACS2 path (inside container) ────────────────────────────────────────
+macs2_path: "/opt/conda/envs/pipeline/bin/macs2"
+
+# ── Output directory ──────────────────────────────────────────────────────
+output_dir: "/output"
+
+# ── Cell-type annotations (cluster number → label) ───────────────────────
+# Based on original code: 0=Neck, 1=Lgr5+, 2=SPEM, 3=Wnt7+, 4=Proliferating, 5=Pre-Pit, 6=Pit
+cluster_labels:
+  "0": "Neck"
+  "1": "Lgr5+"
+  "2": "SPEM"
+  "3": "Wnt7+"
+  "4": "Proliferating"
+  "5": "Pre-Pit"
+  "6": "Pit"
+
+# ── Marker genes (for DotPlot / FeaturePlot) ─────────────────────────────
+marker_genes:
+  - "Lgr5"
+  - "Glipr1"
+  - "Cd44"
+  - "Cftr"
+  - "Muc6"
+  - "Mki67"
+  - "Foxm1"
+  - "Hmgb2"
+  - "Top2a"
+  - "Smc2"
+  - "Gkn1"
+  - "Tff1"
+  - "Gkn2"
+  - "Muc5ac"
+  - "Wnt7b"
+
+# ── Wnt gene family (for VlnPlot) ────────────────────────────────────────
+wnt_genes:
+  - "Wnt1"
+  - "Wnt2"
+  - "Wnt2b"
+  - "Wnt3"
+  - "Wnt3a"
+  - "Wnt4"
+  - "Wnt5a"
+  - "Wnt5b"
+  - "Wnt6"
+  - "Wnt7a"
+  - "Wnt7b"
+  - "Wnt8a"
+  - "Wnt8b"
+  - "Wnt9a"
+  - "Wnt9b"
+  - "Wnt10a"
+  - "Wnt10b"
+  - "Wnt11"
+  - "Wnt16"
+
+# ── Wnt7b ATAC regions for enrichment testing ────────────────────────────
+wnt7b_regions:
+  - "chr15-85568400-85569900"
+  - "chr15-85574150-85575200"
+
+# ── Cluster colors ────────────────────────────────────────────────────────
+cluster_colors:
+  "Neck":          "#8936EF"
+  "Lgr5+":         "#F2CA19"
+  "SPEM":          "#FF00BD"
+  "Wnt7+":         "#E11845"
+  "Proliferating": "#0057E9"
+  "Pre-Pit":       "#87E911"
+  "Pit":           "#018300"
