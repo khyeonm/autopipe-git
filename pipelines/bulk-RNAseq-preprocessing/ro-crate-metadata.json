@@ -1,0 +1,199 @@
+{
+  "@context": "https://w3id.org/ro/crate/1.1/context",
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "about": {
+        "@id": "./"
+      },
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": [
+        "Dataset",
+        "SoftwareSourceCode",
+        "ComputationalWorkflow"
+      ],
+      "creator": [
+        {
+          "@id": "#author"
+        }
+      ],
+      "dateCreated": "2026-04-01",
+      "description": "Bulk RNA-seq preprocessing pipeline using nf-core/rnaseq v3.22.2 with the STAR-Salmon workflow. Takes raw paired-end FASTQ files, performs quality control (FastQC, TrimGalore), alignment (STAR), quantification (Salmon), and generates a comprehensive MultiQC report. iGenomes is disabled by default; users provide their own reference FASTA and GTF files.",
+      "input": [
+        {
+          "@id": "#input-samplesheet"
+        },
+        {
+          "@id": "#input-fastq-gz"
+        },
+        {
+          "@id": "#input-fasta"
+        },
+        {
+          "@id": "#input-gtf"
+        }
+      ],
+      "isBasedOn": {
+        "@id": "https://github.com/nf-core/rnaseq"
+      },
+      "keywords": [
+        "RNA-seq",
+        "bulk RNA-seq",
+        "transcriptomics",
+        "STAR",
+        "Salmon",
+        "nf-core",
+        "preprocessing",
+        "gene expression"
+      ],
+      "license": {
+        "@id": "https://spdx.org/licenses/MIT"
+      },
+      "name": "bulk-RNAseq-preprocessing",
+      "output": [
+        {
+          "@id": "#output-multiqc"
+        },
+        {
+          "@id": "#output-salmon-quant"
+        },
+        {
+          "@id": "#output-star-bam"
+        },
+        {
+          "@id": "#output-gene-counts"
+        }
+      ],
+      "programmingLanguage": {
+        "@id": "#snakemake"
+      },
+      "sdPublisher": {
+        "@id": "https://hub.autopipe.org"
+      },
+      "softwareRequirements": [
+        {
+          "@id": "#nextflow"
+        },
+        {
+          "@id": "#nf-core-rnaseq"
+        },
+        {
+          "@id": "#star"
+        },
+        {
+          "@id": "#salmon"
+        },
+        {
+          "@id": "#fastqc"
+        },
+        {
+          "@id": "#trimgalore"
+        },
+        {
+          "@id": "#multiqc"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "@id": "#author",
+      "@type": "Person",
+      "name": "khyeonmin"
+    },
+    {
+      "@id": "#snakemake",
+      "@type": "ComputerLanguage",
+      "name": "Snakemake",
+      "url": "https://snakemake.readthedocs.io"
+    },
+    {
+      "@id": "#nextflow",
+      "@type": "SoftwareApplication",
+      "name": "Nextflow"
+    },
+    {
+      "@id": "#nf-core-rnaseq",
+      "@type": "SoftwareApplication",
+      "name": "nf-core/rnaseq"
+    },
+    {
+      "@id": "#star",
+      "@type": "SoftwareApplication",
+      "name": "STAR"
+    },
+    {
+      "@id": "#salmon",
+      "@type": "SoftwareApplication",
+      "name": "Salmon"
+    },
+    {
+      "@id": "#fastqc",
+      "@type": "SoftwareApplication",
+      "name": "FastQC"
+    },
+    {
+      "@id": "#trimgalore",
+      "@type": "SoftwareApplication",
+      "name": "Trim Galore"
+    },
+    {
+      "@id": "#multiqc",
+      "@type": "SoftwareApplication",
+      "name": "MultiQC"
+    },
+    {
+      "@id": "#input-samplesheet",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/csv",
+      "name": "samplesheet.csv"
+    },
+    {
+      "@id": "#input-fastq-gz",
+      "@type": "FormalParameter",
+      "encodingFormat": "application/gzip",
+      "name": "fastq.gz"
+    },
+    {
+      "@id": "#input-fasta",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/x-fasta",
+      "name": "Reference genome FASTA"
+    },
+    {
+      "@id": "#input-gtf",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/x-gtf",
+      "name": "Gene annotation GTF"
+    },
+    {
+      "@id": "#output-multiqc",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/html",
+      "name": "multiqc_report.html"
+    },
+    {
+      "@id": "#output-salmon-quant",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/tab-separated-values",
+      "name": "salmon.merged.gene_counts.tsv"
+    },
+    {
+      "@id": "#output-star-bam",
+      "@type": "FormalParameter",
+      "encodingFormat": "application/x-bam",
+      "name": "Aligned BAM files"
+    },
+    {
+      "@id": "#output-gene-counts",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/tab-separated-values",
+      "name": "Gene-level counts matrix"
+    }
+  ]
+}

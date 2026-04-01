@@ -1,0 +1,80 @@
+configfile: "config.yaml"
+
+import os
+
+# Host paths are available via environment variables when needs_docker_socket=true
+HOST_INPUT = os.environ.get("HOST_INPUT_DIR", "/input")
+HOST_OUTPUT = os.environ.get("HOST_OUTPUT_DIR", "/output")
+HOST_PIPELINE = os.environ.get("HOST_PIPELINE_DIR", "/pipeline")
+
+# nf-core/rnaseq pipeline settings
+NFCORE_VERSION = config.get("nfcore_version", "3.22.2")
+GENOME = config.get("genome", None)
+ALIGNER = config.get("aligner", "star_salmon")
+MAX_CPUS = config.get("max_cpus", 8)
+MAX_MEMORY = config.get("max_memory", "32.GB")
+
+# Build the genome flag: only add --genome if explicitly set
+GENOME_FLAG = f"--genome {GENOME}" if GENOME else ""
+
+# Reference files (used when genome is null / no iGenomes)
+FASTA = config.get("fasta", None)
+GTF = config.get("gtf", None)
+STAR_INDEX = config.get("star_index", None)
+
+def build_ref_flags():
+    """Build reference flags from user-provided paths."""
+    flags = []
+    if FASTA:
+        flags.append(f"--fasta {HOST_INPUT}/{FASTA}")
+    if GTF:
+        flags.append(f"--gtf {HOST_INPUT}/{GTF}")
+    if STAR_INDEX:
+        flags.append(f"--star_index {HOST_INPUT}/{STAR_INDEX}")
+    return " ".join(flags)
+
+REF_FLAGS = build_ref_flags()
+
+rule all:
+    input:
+        "/output/nfcore/multiqc/star_salmon/multiqc_report.html"
+
+rule run_nfcore_rnaseq:
+    """
+    Run nf-core/rnaseq pipeline with STAR-Salmon workflow.
+    Requires a samplesheet.csv in the input directory.
+    When genome is null, user must provide --fasta and --gtf via config.
+    """
+    output:
+        "/output/nfcore/multiqc/star_salmon/multiqc_report.html"
+    params:
+        nfcore_version=NFCORE_VERSION,
+        genome_flag=GENOME_FLAG,
+        ref_flags=REF_FLAGS,
+        aligner=ALIGNER,
+        max_cpus=MAX_CPUS,
+        max_memory=MAX_MEMORY,
+        extra=config.get("extra_params", "")
+    log:
+        "/output/logs/nfcore_rnaseq.log"
+    shell:
+        """
+        mkdir -p /output/logs
+
+        export NXF_HOME={HOST_OUTPUT}/.nextflow
+
+        nextflow run nf-core/rnaseq \
+            -r {params.nfcore_version} \
+            -profile docker \
+            --input {HOST_INPUT}/samplesheet.csv \
+            --outdir {HOST_OUTPUT}/nfcore \
+            {params.genome_flag} \
+            {params.ref_flags} \
+            --igenomes_ignore \
+            --aligner {params.aligner} \
+            --max_cpus {params.max_cpus} \
+            --max_memory '{params.max_memory}' \
+            {params.extra} \
+            -w {HOST_OUTPUT}/.nextflow/work \
+            2>&1 | tee {log}
+        """

@@ -1,0 +1,42 @@
+# ============================================================
+# Bulk RNA-seq Preprocessing Pipeline (nf-core/rnaseq)
+# ============================================================
+
+# nf-core/rnaseq version to use
+nfcore_version: "3.22.2"
+
+# Reference genome (iGenomes name)
+# Set to an iGenomes name (e.g., "GRCh38", "GRCm39") to use iGenomes references.
+# Default is null — iGenomes is disabled. You must then provide fasta and gtf below.
+genome: null
+
+# Alignment/quantification workflow
+# Options: star_salmon (recommended), star_rsem, hisat2
+aligner: "star_salmon"
+
+# ============================================================
+# CUSTOM REFERENCE FILES (required when genome is null)
+# ============================================================
+# Paths are relative to the input directory (mounted at /input).
+
+# Reference genome FASTA file
+fasta: "reference/Mus_musculus.GRCm39.dna_sm.primary_assembly.fa.gz"
+
+# Gene annotation GTF file
+gtf: "reference/Mus_musculus.GRCm39.113.gtf.gz"
+
+# Pre-built STAR index directory (optional, speeds up runs)
+# If not provided, STAR index will be built from fasta + gtf
+star_index: null
+
+# ============================================================
+# RESOURCE LIMITS
+# ============================================================
+# Adjust to match your server capacity
+max_cpus: 8
+max_memory: "32.GB"
+
+# ============================================================
+# ADDITIONAL PARAMETERS (optional)
+# ============================================================
+extra_params: ""
