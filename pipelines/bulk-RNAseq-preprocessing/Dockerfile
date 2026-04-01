@@ -6,16 +6,12 @@ RUN conda install -y -c bioconda -c conda-forge \
     bash \
     curl \
     openjdk=17 \
+    nextflow=24.10.4 \
     && conda clean -afy
 
 # Replace system bash with conda bash (prevents GLIBC mismatch)
 RUN ln -sf /opt/conda/bin/bash /usr/bin/bash && \
     ln -sf /opt/conda/bin/bash /bin/sh
-
-# Install Nextflow
-RUN curl -s https://get.nextflow.io | bash && \
-    mv nextflow /usr/local/bin/ && \
-    chmod +x /usr/local/bin/nextflow
 
 # Setup pipeline
 WORKDIR /pipeline

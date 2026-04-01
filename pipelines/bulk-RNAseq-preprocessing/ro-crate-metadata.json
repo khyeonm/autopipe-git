@@ -195,6 +195,5 @@
       "encodingFormat": "text/tab-separated-values",
       "name": "Gene-level counts matrix"
     }
-  ],
-  "version": "1.0.0"
+  ]
 }
