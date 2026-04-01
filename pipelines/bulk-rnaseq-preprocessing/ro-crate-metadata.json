@@ -93,7 +93,7 @@
           "@id": "#multiqc"
         }
       ],
-      "version": "1.0.2"
+      "version": "1.0.0"
     },
     {
       "@id": "#author",
@@ -171,6 +171,5 @@
       "encodingFormat": "text/html",
       "name": "MultiQC report"
     }
-  ],
-  "version": "1.0.2"
+  ]
 }
