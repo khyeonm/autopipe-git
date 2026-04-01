@@ -1,0 +1,175 @@
+{
+  "@context": "https://w3id.org/ro/crate/1.1/context",
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "about": {
+        "@id": "./"
+      },
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": [
+        "Dataset",
+        "SoftwareSourceCode",
+        "ComputationalWorkflow"
+      ],
+      "creator": [
+        {
+          "@id": "#author"
+        }
+      ],
+      "dateCreated": "2026-04-01",
+      "description": "Bulk RNA-seq preprocessing pipeline using nf-core/rnaseq with the STAR-Salmon workflow. Processes raw FASTQ files through quality control (FastQC), adapter trimming (Trim Galore / fastp), alignment (STAR), and quantification (Salmon) to produce gene-level and transcript-level expression matrices along with comprehensive MultiQC reports.",
+      "input": [
+        {
+          "@id": "#input-fastq-gz"
+        },
+        {
+          "@id": "#input-samplesheet"
+        }
+      ],
+      "isBasedOn": {
+        "@id": "https://nf-co.re/rnaseq/3.22.2"
+      },
+      "keywords": [
+        "RNA-seq",
+        "bulk RNA-seq",
+        "preprocessing",
+        "STAR",
+        "Salmon",
+        "nf-core",
+        "gene expression",
+        "transcriptomics",
+        "alignment",
+        "quantification",
+        "quality control"
+      ],
+      "license": {
+        "@id": "https://spdx.org/licenses/MIT"
+      },
+      "name": "bulk-rnaseq-preprocessing",
+      "output": [
+        {
+          "@id": "#output-gene-counts"
+        },
+        {
+          "@id": "#output-bam"
+        },
+        {
+          "@id": "#output-multiqc-report"
+        }
+      ],
+      "programmingLanguage": {
+        "@id": "#snakemake"
+      },
+      "sdPublisher": {
+        "@id": "https://hub.autopipe.org"
+      },
+      "softwareRequirements": [
+        {
+          "@id": "#nextflow"
+        },
+        {
+          "@id": "#nf-core-rnaseq"
+        },
+        {
+          "@id": "#star"
+        },
+        {
+          "@id": "#salmon"
+        },
+        {
+          "@id": "#fastqc"
+        },
+        {
+          "@id": "#trimgalore"
+        },
+        {
+          "@id": "#multiqc"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "@id": "#author",
+      "@type": "Person",
+      "name": ""
+    },
+    {
+      "@id": "#snakemake",
+      "@type": "ComputerLanguage",
+      "name": "Snakemake",
+      "url": "https://snakemake.readthedocs.io"
+    },
+    {
+      "@id": "#nextflow",
+      "@type": "SoftwareApplication",
+      "name": "Nextflow"
+    },
+    {
+      "@id": "#nf-core-rnaseq",
+      "@type": "SoftwareApplication",
+      "name": "nf-core/rnaseq"
+    },
+    {
+      "@id": "#star",
+      "@type": "SoftwareApplication",
+      "name": "STAR"
+    },
+    {
+      "@id": "#salmon",
+      "@type": "SoftwareApplication",
+      "name": "Salmon"
+    },
+    {
+      "@id": "#fastqc",
+      "@type": "SoftwareApplication",
+      "name": "FastQC"
+    },
+    {
+      "@id": "#trimgalore",
+      "@type": "SoftwareApplication",
+      "name": "Trim Galore"
+    },
+    {
+      "@id": "#multiqc",
+      "@type": "SoftwareApplication",
+      "name": "MultiQC"
+    },
+    {
+      "@id": "#input-fastq-gz",
+      "@type": "FormalParameter",
+      "encodingFormat": "application/gzip",
+      "name": "FASTQ files"
+    },
+    {
+      "@id": "#input-samplesheet",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/csv",
+      "name": "samplesheet.csv"
+    },
+    {
+      "@id": "#output-gene-counts",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/tab-separated-values",
+      "name": "Gene count matrix"
+    },
+    {
+      "@id": "#output-bam",
+      "@type": "FormalParameter",
+      "encodingFormat": "application/x-bam",
+      "name": "Aligned BAM files"
+    },
+    {
+      "@id": "#output-multiqc-report",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/html",
+      "name": "MultiQC report"
+    }
+  ]
+}
