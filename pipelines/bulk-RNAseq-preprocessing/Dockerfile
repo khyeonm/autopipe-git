@@ -1,10 +1,9 @@
 FROM condaforge/miniforge3:latest
 
-# Install snakemake and basic tools
+# Install snakemake, nextflow, and basic tools via conda
 RUN conda install -y -c bioconda -c conda-forge \
     snakemake-minimal \
     bash \
-    curl \
     openjdk=17 \
     nextflow=24.10.4 \
     && conda clean -afy
