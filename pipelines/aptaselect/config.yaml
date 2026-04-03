@@ -1,0 +1,31 @@
+# =============================================================
+# AptaSelect Pipeline Configuration
+# =============================================================
+
+# --- Input files (filenames within the /input mount) ---
+read1: "test_1.fq"
+read2: "test_2.fq"
+
+# --- Stage 1: Join parameters ---
+min_overlap: 6              # Minimum overlap length (bp)
+max_mismatch_pct: 8.0       # Maximum mismatch rate (%) in overlap
+long_mode: false            # false = short library mode (default), true = long library mode
+
+# --- Pattern mismatch tolerance (stages 2-4) ---
+pattern_mismatch: 1         # Max mismatches allowed when matching patterns
+
+# --- Stage 2: Selection Filtering patterns ---
+sel_left: "CCACTTCTCCTTCCATCCTAAAC"
+sel_right: "GAGTAGTTTGGAGGGTTGTCTG"
+
+# --- Stage 3: 1st Sort Filtering patterns ---
+sort1_left: "TCCTAAAC"      # Suffix of Selection left pattern
+sort1_right: "GAGTAGTT"     # Prefix of Selection right pattern
+
+# --- Stage 4: 2nd Sort Filtering patterns ---
+sort2_left: "TCTCTCTCTC"
+sort2_right: "GAGAGAGAGA"
+sort2_between_length: 20    # Required exact between-length (bp)
+
+# --- Processing ---
+chunk_size: 10000           # Records per processing chunk
