@@ -99,5 +99,6 @@
       "encodingFormat": "text/plain",
       "name": "Pipeline summary statistics"
     }
-  ]
+  ],
+  "version": "1.0.0"
 }
