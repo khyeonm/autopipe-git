@@ -1,0 +1,26 @@
+configfile: "config.yaml"
+
+rule all:
+    input:
+        "/output/umap_leiden.png",
+        "/output/umap_qc_metrics.png",
+        "/output/qc_violin.png",
+        "/output/hvg_plot.png",
+        "/output/pca_elbow.png",
+        "/output/processed.h5ad"
+
+rule run_analysis:
+    """Run single cell downstream analysis: QC, normalization, HVG, PCA, UMAP, Leiden clustering."""
+    input:
+        h5ad=config["input_h5ad"]
+    output:
+        umap="/output/umap_leiden.png",
+        umap_qc="/output/umap_qc_metrics.png",
+        qc_violin="/output/qc_violin.png",
+        hvg="/output/hvg_plot.png",
+        elbow="/output/pca_elbow.png",
+        processed="/output/processed.h5ad"
+    log:
+        "/output/analysis.log"
+    shell:
+        "python /pipeline/scripts/run_analysis.py 2>&1 | tee {log}"

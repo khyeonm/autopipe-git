@@ -1,0 +1,123 @@
+{
+  "@context": "https://w3id.org/ro/crate/1.1/context",
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "about": {
+        "@id": "./"
+      },
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": [
+        "Dataset",
+        "SoftwareSourceCode",
+        "ComputationalWorkflow"
+      ],
+      "creator": [
+        {
+          "@id": "#author"
+        }
+      ],
+      "dateCreated": "2026-04-09",
+      "description": "A single cell RNA-seq downstream analysis pipeline that performs QC filtering, normalization, highly variable gene selection, PCA, UMAP embedding, and Leiden clustering. Takes raw count h5ad files as input and produces UMAP plots, QC plots, and processed h5ad files.",
+      "input": [
+        {
+          "@id": "#input-h5ad"
+        }
+      ],
+      "isBasedOn": {
+        "@id": ""
+      },
+      "keywords": [
+        "single-cell",
+        "scRNA-seq",
+        "UMAP",
+        "clustering",
+        "leiden",
+        "scanpy",
+        "downstream-analysis",
+        "QC"
+      ],
+      "license": {
+        "@id": "https://spdx.org/licenses/MIT"
+      },
+      "name": "single cell downstream pipeline",
+      "output": [
+        {
+          "@id": "#output-h5ad"
+        },
+        {
+          "@id": "#output-umap-png"
+        },
+        {
+          "@id": "#output-qc-png"
+        }
+      ],
+      "programmingLanguage": {
+        "@id": "#snakemake"
+      },
+      "sdPublisher": {
+        "@id": "https://hub.autopipe.org"
+      },
+      "softwareRequirements": [
+        {
+          "@id": "#scanpy"
+        },
+        {
+          "@id": "#leidenalg"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "@id": "#author",
+      "@type": "Person",
+      "name": "khyeonmin"
+    },
+    {
+      "@id": "#snakemake",
+      "@type": "ComputerLanguage",
+      "name": "Snakemake",
+      "url": "https://snakemake.readthedocs.io"
+    },
+    {
+      "@id": "#scanpy",
+      "@type": "SoftwareApplication",
+      "name": "scanpy"
+    },
+    {
+      "@id": "#leidenalg",
+      "@type": "SoftwareApplication",
+      "name": "leidenalg"
+    },
+    {
+      "@id": "#input-h5ad",
+      "@type": "FormalParameter",
+      "encodingFormat": "application/x-hdf5",
+      "name": "h5ad"
+    },
+    {
+      "@id": "#output-h5ad",
+      "@type": "FormalParameter",
+      "encodingFormat": "application/x-hdf5",
+      "name": "processed.h5ad"
+    },
+    {
+      "@id": "#output-umap-png",
+      "@type": "FormalParameter",
+      "encodingFormat": "image/png",
+      "name": "umap_leiden.png"
+    },
+    {
+      "@id": "#output-qc-png",
+      "@type": "FormalParameter",
+      "encodingFormat": "image/png",
+      "name": "qc_violin.png"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+# Input data path (Docker mount point)
+input_h5ad: "/input/10k.h5ad"
+
+# Output directory (Docker mount point)
+output_dir: "/output"
+
+# ---- QC & Filtering Parameters ----
+# Minimum number of genes expressed per cell
+min_genes: 200
+# Minimum number of cells expressing a gene
+min_cells: 3
+# Maximum mitochondrial gene percentage
+max_mito_pct: 20
+# Minimum total counts per cell
+min_counts: 500
+# Maximum total counts per cell
+max_counts: 50000
+
+# ---- Analysis Parameters ----
+# Number of highly variable genes to select
+n_top_genes: 2000
+# Number of principal components
+n_pcs: 50
+# Number of neighbors for kNN graph
+n_neighbors: 15
+# Leiden clustering resolution
+resolution: 1.0
+# Random seed for reproducibility
+random_state: 42
