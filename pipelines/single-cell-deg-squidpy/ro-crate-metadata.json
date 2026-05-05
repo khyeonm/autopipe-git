@@ -135,5 +135,6 @@
       "encodingFormat": "text/tab-separated-values",
       "name": "Squidpy spatial analysis tables"
     }
-  ]
+  ],
+  "version": "1.0.0"
 }
