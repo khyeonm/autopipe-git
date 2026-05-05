@@ -1,0 +1,139 @@
+{
+  "@context": "https://w3id.org/ro/crate/1.1/context",
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "about": {
+        "@id": "./"
+      },
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": [
+        "Dataset",
+        "SoftwareSourceCode",
+        "ComputationalWorkflow"
+      ],
+      "creator": [
+        {
+          "@id": "#author"
+        }
+      ],
+      "dateCreated": "2026-05-04",
+      "description": "Single-cell differential expression workflow for AnnData h5ad files. The pipeline ranks marker genes across observation groups, exports differential expression tables and plots, and uses Squidpy to compute spatial neighborhood enrichment and spatial autocorrelation when spatial coordinates are present.",
+      "input": [
+        {
+          "@id": "#input-h5ad"
+        }
+      ],
+      "isBasedOn": {
+        "@id": ""
+      },
+      "keywords": [
+        "single-cell",
+        "differential-expression",
+        "AnnData",
+        "Scanpy",
+        "Squidpy",
+        "spatial-transcriptomics"
+      ],
+      "license": {
+        "@id": "https://spdx.org/licenses/MIT"
+      },
+      "name": "single-cell-deg-squidpy",
+      "output": [
+        {
+          "@id": "#output-deg"
+        },
+        {
+          "@id": "#output-markers"
+        },
+        {
+          "@id": "#output-summary"
+        },
+        {
+          "@id": "#output-plots"
+        },
+        {
+          "@id": "#output-squidpy"
+        }
+      ],
+      "programmingLanguage": {
+        "@id": "#snakemake"
+      },
+      "sdPublisher": {
+        "@id": "https://hub.autopipe.org"
+      },
+      "softwareRequirements": [
+        {
+          "@id": "#scanpy"
+        },
+        {
+          "@id": "#squidpy"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "@id": "#author",
+      "@type": "Person",
+      "name": ""
+    },
+    {
+      "@id": "#snakemake",
+      "@type": "ComputerLanguage",
+      "name": "Snakemake",
+      "url": "https://snakemake.readthedocs.io"
+    },
+    {
+      "@id": "#scanpy",
+      "@type": "SoftwareApplication",
+      "name": "Scanpy"
+    },
+    {
+      "@id": "#squidpy",
+      "@type": "SoftwareApplication",
+      "name": "Squidpy"
+    },
+    {
+      "@id": "#input-h5ad",
+      "@type": "FormalParameter",
+      "encodingFormat": "application/x-hdf5",
+      "name": "AnnData h5ad file"
+    },
+    {
+      "@id": "#output-deg",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/tab-separated-values",
+      "name": "Differential expression result table"
+    },
+    {
+      "@id": "#output-markers",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/tab-separated-values",
+      "name": "Top marker genes by group"
+    },
+    {
+      "@id": "#output-summary",
+      "@type": "FormalParameter",
+      "encodingFormat": "application/json",
+      "name": "Analysis summary JSON"
+    },
+    {
+      "@id": "#output-plots",
+      "@type": "FormalParameter",
+      "encodingFormat": "image/png",
+      "name": "Quality control and marker plots"
+    },
+    {
+      "@id": "#output-squidpy",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/tab-separated-values",
+      "name": "Squidpy spatial analysis tables"
+    }
+  ]
+}
