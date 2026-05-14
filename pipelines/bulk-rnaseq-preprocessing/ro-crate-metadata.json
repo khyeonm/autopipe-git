@@ -164,5 +164,6 @@
       "encodingFormat": "application/x-bam",
       "name": "sorted.bam"
     }
-  ]
+  ],
+  "version": "1.0.0"
 }
