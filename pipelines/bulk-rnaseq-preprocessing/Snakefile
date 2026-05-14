@@ -1,0 +1,75 @@
+configfile: "config.yaml"
+
+# ──────────────────────────────────────────────────────────────
+# Bulk RNA-seq Preprocessing Pipeline
+# Wraps nf-core/rnaseq (STAR + Salmon) via Nextflow
+# ──────────────────────────────────────────────────────────────
+
+import os
+
+NFCORE_VERSION = config.get("nfcore_rnaseq_version", "3.22.2")
+ALIGNER       = config.get("aligner", "star_salmon")
+GENOME        = config.get("genome", None)
+FASTA         = config.get("fasta", "")
+GTF           = config.get("gtf", "")
+SAMPLESHEET   = config.get("samplesheet", "Mus_sheet.csv")
+EXTRA_ARGS    = config.get("extra_args", "")
+MAX_CPUS      = config.get("max_cpus", 16)
+MAX_MEMORY    = config.get("max_memory", "64.GB")
+MAX_TIME      = config.get("max_time", "48.h")
+
+rule all:
+    input:
+        "/output/nfcore_rnaseq/multiqc/star_salmon/multiqc_report.html"
+
+rule run_nfcore_rnaseq:
+    """Run nf-core/rnaseq pipeline with STAR + Salmon aligner."""
+    output:
+        "/output/nfcore_rnaseq/multiqc/star_salmon/multiqc_report.html"
+    log:
+        "/output/logs/nfcore_rnaseq.log"
+    params:
+        nfcore_version=NFCORE_VERSION,
+        aligner=ALIGNER,
+        genome=GENOME,
+        fasta=FASTA,
+        gtf=GTF,
+        samplesheet=SAMPLESHEET,
+        extra=EXTRA_ARGS,
+        max_cpus=MAX_CPUS,
+        max_memory=MAX_MEMORY,
+        max_time=MAX_TIME,
+    shell:
+        """
+        set -euo pipefail
+        mkdir -p /output/logs
+
+        export NXF_HOME=$HOST_OUTPUT_DIR/.nextflow
+
+        # Build genome arguments
+        GENOME_ARGS=""
+        if [ -n "{params.genome}" ] && [ "{params.genome}" != "None" ]; then
+            GENOME_ARGS="--genome {params.genome}"
+        else
+            if [ -n "{params.fasta}" ]; then
+                GENOME_ARGS="$GENOME_ARGS --fasta $HOST_INPUT_DIR/{params.fasta}"
+            fi
+            if [ -n "{params.gtf}" ]; then
+                GENOME_ARGS="$GENOME_ARGS --gtf $HOST_INPUT_DIR/{params.gtf}"
+            fi
+        fi
+
+        nextflow run nf-core/rnaseq \
+            -r {params.nfcore_version} \
+            -profile docker \
+            --input $HOST_INPUT_DIR/{params.samplesheet} \
+            --outdir $HOST_OUTPUT_DIR/nfcore_rnaseq \
+            --aligner {params.aligner} \
+            $GENOME_ARGS \
+            --max_cpus {params.max_cpus} \
+            --max_memory '{params.max_memory}' \
+            --max_time '{params.max_time}' \
+            {params.extra} \
+            -w $HOST_OUTPUT_DIR/.nextflow/work \
+            2>&1 | tee {{log}}
+        """

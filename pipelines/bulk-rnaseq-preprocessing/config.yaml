@@ -1,0 +1,33 @@
+# ──────────────────────────────────────────────────────────────
+# Bulk RNA-seq Preprocessing Pipeline — Configuration
+# Uses nf-core/rnaseq with STAR + Salmon
+# ──────────────────────────────────────────────────────────────
+
+# nf-core/rnaseq version (pinned for reproducibility)
+nfcore_rnaseq_version: "3.22.2"
+
+# Aligner: star_salmon (default), star_rsem, or hisat2
+aligner: "star_salmon"
+
+# ── Reference genome ─────────────────────────────────────────
+# Option 1: Use an iGenomes reference (set to a valid iGenomes key, e.g. "GRCh38")
+# Option 2: Set to null (default) and provide fasta + gtf below
+genome: null
+
+# Required when genome is null — paths relative to /input
+fasta: "References/Mus_musculus.GRCm39.dna_sm.primary_assembly.fa.gz"
+gtf: "References/Mus_musculus.GRCm39.113.gtf.gz"
+
+# ── Samplesheet ──────────────────────────────────────────────
+# nf-core samplesheet CSV (relative to /input)
+samplesheet: "Mus_sheet.csv"
+
+# ── Resource limits ──────────────────────────────────────────
+max_cpus: 16
+max_memory: "64.GB"
+max_time: "48.h"
+
+# ── Extra arguments ──────────────────────────────────────────
+# Any additional nf-core/rnaseq arguments (passed directly to nextflow run)
+# Example: "--skip_trimming --extra_star_align_args '--outFilterMismatchNmax 10'"
+extra_args: ""
