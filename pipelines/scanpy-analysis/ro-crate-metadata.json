@@ -127,5 +127,6 @@
       "encodingFormat": "text/csv",
       "name": "statistics"
     }
-  ]
+  ],
+  "version": "1.0.0"
 }
