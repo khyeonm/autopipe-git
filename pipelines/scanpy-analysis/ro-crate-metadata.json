@@ -1,0 +1,131 @@
+{
+  "@context": "https://w3id.org/ro/crate/1.1/context",
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "about": {
+        "@id": "./"
+      },
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": [
+        "Dataset",
+        "SoftwareSourceCode",
+        "ComputationalWorkflow"
+      ],
+      "creator": [
+        {
+          "@id": "#author"
+        }
+      ],
+      "dateCreated": "2025-01-01",
+      "description": "Single-cell RNA-seq downstream analysis pipeline using Scanpy. Performs quality control, normalization, highly variable gene selection, PCA, KNN graph construction, Leiden clustering, UMAP embedding, differential expression analysis, and generates comprehensive visualization plots including UMAP, heatmaps, and PCA variance plots.",
+      "input": [
+        {
+          "@id": "#input-h5ad"
+        }
+      ],
+      "isBasedOn": {
+        "@id": ""
+      },
+      "keywords": [
+        "single-cell",
+        "scRNA-seq",
+        "scanpy",
+        "clustering",
+        "dimensionality reduction",
+        "differential expression",
+        "UMAP",
+        "PCA",
+        "Leiden",
+        "quality control"
+      ],
+      "license": {
+        "@id": "https://spdx.org/licenses/MIT"
+      },
+      "name": "scanpy-analysis",
+      "output": [
+        {
+          "@id": "#output-h5ad"
+        },
+        {
+          "@id": "#output-plots"
+        },
+        {
+          "@id": "#output-stats"
+        }
+      ],
+      "programmingLanguage": {
+        "@id": "#snakemake"
+      },
+      "sdPublisher": {
+        "@id": "https://hub.autopipe.org"
+      },
+      "softwareRequirements": [
+        {
+          "@id": "#scanpy"
+        },
+        {
+          "@id": "#anndata"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "@id": "#author",
+      "@type": "Person",
+      "name": "khyeonm"
+    },
+    {
+      "@id": "#snakemake",
+      "@type": "ComputerLanguage",
+      "name": "Snakemake",
+      "url": "https://snakemake.readthedocs.io"
+    },
+    {
+      "@id": "#scanpy",
+      "@type": "SoftwareApplication",
+      "name": "Scanpy",
+      "url": "https://scanpy.readthedocs.io"
+    },
+    {
+      "@id": "#anndata",
+      "@type": "SoftwareApplication",
+      "name": "AnnData",
+      "url": "https://anndata.readthedocs.io"
+    },
+    {
+      "@id": "#input-h5ad",
+      "@type": "FormalParameter",
+      "description": "Input AnnData object in h5ad format containing raw count matrix",
+      "encodingFormat": "application/x-hdf5",
+      "name": "h5ad"
+    },
+    {
+      "@id": "#output-h5ad",
+      "@type": "FormalParameter",
+      "description": "Processed AnnData object with all analysis results",
+      "encodingFormat": "application/x-hdf5",
+      "name": "h5ad"
+    },
+    {
+      "@id": "#output-plots",
+      "@type": "FormalParameter",
+      "description": "Visualization plots (UMAP, heatmap, PCA)",
+      "encodingFormat": "image/png",
+      "name": "plots"
+    },
+    {
+      "@id": "#output-stats",
+      "@type": "FormalParameter",
+      "description": "Cluster statistics and marker gene tables",
+      "encodingFormat": "text/csv",
+      "name": "statistics"
+    }
+  ]
+}

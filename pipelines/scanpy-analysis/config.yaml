@@ -1,0 +1,38 @@
+# Single-Cell Downstream Analysis Pipeline Configuration
+# =====================================================
+
+# Required: Input h5ad file path (mounted at /input at runtime)
+# This should be a preprocessed h5ad file with raw counts in .X or .raw.X
+input_h5ad: "/input/10k.h5ad"
+
+# Quality Control Parameters
+min_cells: 3          # Minimum number of cells a gene must be detected in
+min_genes: 200        # Minimum number of genes per cell
+max_genes: 7500       # Maximum number of genes per cell
+max_mito_percent: 20.0  # Maximum percentage of mitochondrial genes
+
+# Normalization
+normalize_target: 10000  # Target sum for log-normalization
+
+# Highly Variable Genes
+n_hvg: 2000           # Number of highly variable genes to select
+
+# PCA
+n_pcs: 50             # Number of principal components
+
+# KNN Graph
+n_neighbors: 15       # Number of neighbors for KNN graph
+
+# Clustering
+resolution: 0.5       # Leiden clustering resolution (higher = more clusters)
+
+# UMAP
+umap_min_dist: 0.3    # Minimum distance for UMAP embedding
+
+# Differential Expression
+de_n_top: 50          # Number of top marker genes per cluster
+de_min_frac: 0.25     # Minimum fraction of cells expressing the gene
+de_logfc_thresh: 0.25  # Minimum log-fold change threshold
+
+# Number of threads for parallelizable steps
+threads: 4

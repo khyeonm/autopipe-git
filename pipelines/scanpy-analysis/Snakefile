@@ -1,0 +1,267 @@
+configfile: "config.yaml"
+
+# Global configuration
+H5AD_INPUT = config["input_h5ad"]
+
+# Output paths
+QC_OUTPUT = "/output/qc_report.h5ad"
+NORMALIZED_OUTPUT = "/output/normalized.h5ad"
+HVG_OUTPUT = "/output/hvg_selected.h5ad"
+PCA_OUTPUT = "/output/pca.h5ad"
+KNN_OUTPUT = "/output/knn_graph.h5ad"
+CLUSTERED_OUTPUT = "/output/clustered.h5ad"
+UMAP_OUTPUT = "/output/umap.h5ad"
+DE_OUTPUT = "/output/de_results.h5ad"
+ANNOTATED_OUTPUT = "/output/annotated.h5ad"
+
+# Plot outputs
+UMAP_PLOT = "/output/plots/umap_clusters.png"
+UMAP_PLOT_PDF = "/output/plots/umap_clusters.pdf"
+HEATMAP_PLOT = "/output/plots/marker_heatmap.png"
+HEATMAP_PLOT_PDF = "/output/plots/marker_heatmap.pdf"
+PCA_PLOT = "/output/plots/pca_variance.png"
+PCA_PLOT_PDF = "/output/plots/pca_variance.pdf"
+CLUSTER_STATS = "/output/plots/cluster_stats.csv"
+
+# Log directory
+LOG_DIR = "/output/logs"
+
+# Script directory (pipeline files are at /pipeline)
+SCRIPTS = "/pipeline/scripts"
+
+rule all:
+    """Final target: all analysis outputs."""
+    input:
+        ANNOTATED_OUTPUT,
+        DE_OUTPUT,
+        UMAP_PLOT,
+        UMAP_PLOT_PDF,
+        HEATMAP_PLOT,
+        HEATMAP_PLOT_PDF,
+        PCA_PLOT,
+        PCA_PLOT_PDF,
+        CLUSTER_STATS,
+        "summary_qc_report.csv",
+
+
+rule quality_control:
+    """Step 1: Quality control - filter cells and genes, calculate QC metrics."""
+    input:
+        H5AD_INPUT
+    output:
+        QC_OUTPUT
+    params:
+        min_cells=config["min_cells"],
+        min_genes=config["min_genes"],
+        max_genes=config["max_genes"],
+        max_mito_percent=config["max_mito_percent"],
+        log_dir=LOG_DIR,
+        scripts=SCRIPTS
+    threads: config.get("threads", 4)
+    shell:
+        """
+        mkdir -p {params.log_dir} &&
+        INPUT_PATH={input} OUTPUT_PATH={output} LOG_PATH={params.log_dir}/qc.log \
+        MIN_CELLS={params.min_cells} MIN_GENES={params.min_genes} \
+        MAX_GENES={params.max_genes} MAX_MITO_PERCENT={params.max_mito_percent} \
+        python {params.scripts}/01_quality_control.py
+        """
+
+
+rule normalize:
+    """Step 2: Log-normalize the data."""
+    input:
+        QC_OUTPUT
+    output:
+        NORMALIZED_OUTPUT
+    params:
+        normalize_target=config["normalize_target"],
+        log_dir=LOG_DIR,
+        scripts=SCRIPTS
+    threads: config.get("threads", 4)
+    shell:
+        """
+        INPUT_PATH={input} OUTPUT_PATH={output} LOG_PATH={params.log_dir}/normalize.log \
+        NORMALIZE_TARGET={params.normalize_target} \
+        python {params.scripts}/02_normalize.py
+        """
+
+
+rule select_hvg:
+    """Step 3: Select highly variable genes."""
+    input:
+        NORMALIZED_OUTPUT
+    output:
+        HVG_OUTPUT
+    params:
+        n_hvg=config["n_hvg"],
+        log_dir=LOG_DIR,
+        scripts=SCRIPTS
+    threads: config.get("threads", 4)
+    shell:
+        """
+        INPUT_PATH={input} OUTPUT_PATH={output} LOG_PATH={params.log_dir}/hvg.log \
+        N_HVG={params.n_hvg} \
+        python {params.scripts}/03_select_hvg.py
+        """
+
+
+rule run_pca:
+    """Step 4: Principal Component Analysis."""
+    input:
+        HVG_OUTPUT
+    output:
+        PCA_OUTPUT
+    params:
+        n_pcs=config["n_pcs"],
+        log_dir=LOG_DIR,
+        scripts=SCRIPTS
+    threads: config.get("threads", 4)
+    shell:
+        """
+        INPUT_PATH={input} OUTPUT_PATH={output} LOG_PATH={params.log_dir}/pca.log \
+        N_PCS={params.n_pcs} \
+        python {params.scripts}/04_pca.py
+        """
+
+
+rule build_knn:
+    """Step 5: Build KNN graph."""
+    input:
+        PCA_OUTPUT
+    output:
+        KNN_OUTPUT
+    params:
+        n_neighbors=config["n_neighbors"],
+        n_pcs=config["n_pcs"],
+        log_dir=LOG_DIR,
+        scripts=SCRIPTS
+    threads: config.get("threads", 4)
+    shell:
+        """
+        INPUT_PATH={input} OUTPUT_PATH={output} LOG_PATH={params.log_dir}/knn.log \
+        N_NEIGHBORS={params.n_neighbors} N_PCS={params.n_pcs} \
+        python {params.scripts}/05_knn_graph.py
+        """
+
+
+rule leiden_clustering:
+    """Step 6: Leiden clustering."""
+    input:
+        KNN_OUTPUT
+    output:
+        CLUSTERED_OUTPUT
+    params:
+        resolution=config["resolution"],
+        log_dir=LOG_DIR,
+        scripts=SCRIPTS
+    threads: config.get("threads", 4)
+    shell:
+        """
+        INPUT_PATH={input} OUTPUT_PATH={output} LOG_PATH={params.log_dir}/clustering.log \
+        RESOLUTION={params.resolution} \
+        python {params.scripts}/06_leiden_clustering.py
+        """
+
+
+rule run_umap:
+    """Step 7: UMAP embedding for visualization."""
+    input:
+        CLUSTERED_OUTPUT
+    output:
+        UMAP_OUTPUT
+    params:
+        umap_min_dist=config["umap_min_dist"],
+        n_pcs=config["n_pcs"],
+        log_dir=LOG_DIR,
+        scripts=SCRIPTS
+    threads: config.get("threads", 4)
+    shell:
+        """
+        INPUT_PATH={input} OUTPUT_PATH={output} LOG_PATH={params.log_dir}/umap.log \
+        UMAP_MIN_DIST={params.umap_min_dist} N_PCS={params.n_pcs} \
+        python {params.scripts}/07_umap.py
+        """
+
+
+rule differential_expression:
+    """Step 8: Differential expression analysis per cluster."""
+    input:
+        UMAP_OUTPUT
+    output:
+        DE_OUTPUT
+    params:
+        de_n_top=config["de_n_top"],
+        de_min_frac=config["de_min_frac"],
+        de_logfc_thresh=config["de_logfc_thresh"],
+        log_dir=LOG_DIR,
+        scripts=SCRIPTS
+    threads: config.get("threads", 4)
+    shell:
+        """
+        INPUT_PATH={input} OUTPUT_PATH={output} LOG_PATH={params.log_dir}/de_analysis.log \
+        DE_N_TOP={params.de_n_top} DE_MIN_FRAC={params.de_min_frac} \
+        DE_LOGFC_THRESH={params.de_logfc_thresh} \
+        python {params.scripts}/08_differential_expression.py
+        """
+
+
+rule annotate_clusters:
+    """Step 9: Cell type annotation and final summary."""
+    input:
+        DE_OUTPUT
+    output:
+        ANNOTATED_OUTPUT
+    params:
+        log_dir=LOG_DIR,
+        scripts=SCRIPTS
+    threads: config.get("threads", 4)
+    shell:
+        """
+        INPUT_PATH={input} OUTPUT_PATH={output} LOG_PATH={params.log_dir}/annotation.log \
+        python {params.scripts}/09_annotate_clusters.py
+        """
+
+
+rule generate_plots:
+    """Step 10: Generate all visualization plots."""
+    input:
+        ANNOTATED_OUTPUT
+    output:
+        umap_png=UMAP_PLOT,
+        umap_pdf=UMAP_PLOT_PDF,
+        heatmap_png=HEATMAP_PLOT,
+        heatmap_pdf=HEATMAP_PLOT_PDF,
+        pca_png=PCA_PLOT,
+        pca_pdf=PCA_PLOT_PDF,
+        cluster_stats=CLUSTER_STATS
+    params:
+        log_dir=LOG_DIR,
+        scripts=SCRIPTS
+    threads: config.get("threads", 4)
+    shell:
+        """
+        INPUT_PATH={input} \
+        UMAP_PNG={output.umap_png} UMAP_PDF={output.umap_pdf} \
+        HEATMAP_PNG={output.heatmap_png} HEATMAP_PDF={output.heatmap_pdf} \
+        PCA_PNG={output.pca_png} PCA_PDF={output.pca_pdf} \
+        CLUSTER_STATS={output.cluster_stats} \
+        LOG_PATH={params.log_dir}/plots.log \
+        python {params.scripts}/10_generate_plots.py
+        """
+
+
+rule generate_qc_summary:
+    """Generate QC summary report."""
+    input:
+        QC_OUTPUT
+    output:
+        "summary_qc_report.csv"
+    params:
+        log_dir=LOG_DIR,
+        scripts=SCRIPTS
+    shell:
+        """
+        INPUT_PATH={input} OUTPUT_PATH={output} LOG_PATH={params.log_dir}/qc_summary.log \
+        python {params.scripts}/11_qc_summary.py
+        """
