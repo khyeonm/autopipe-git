@@ -1,0 +1,184 @@
+import glob
+import os
+import re
+
+configfile: "config.yaml"
+
+# ---------------------------------------------------------------------------
+# Auto-detect samples from /input directory
+# Expects paired files: {sample}_1.fq[.gz] and {sample}_2.fq[.gz]
+# ---------------------------------------------------------------------------
+def detect_samples():
+    r1_files = sorted(
+        glob.glob("/input/*_1.fq") + glob.glob("/input/*_1.fq.gz")
+    )
+    samples = {}
+    for r1 in r1_files:
+        basename = os.path.basename(r1)
+        # Extract sample name: everything before _1.fq or _1.fq.gz
+        m = re.match(r"^(.+)_1\.fq(\.gz)?$", basename)
+        if not m:
+            continue
+        sample = m.group(1)
+        ext = ".fq.gz" if m.group(2) else ".fq"
+        r2 = os.path.join("/input", f"{sample}_2{ext}")
+        if os.path.exists(r2):
+            samples[sample] = {"r1": r1, "r2": r2}
+    return samples
+
+SAMPLES = detect_samples()
+SAMPLE_NAMES = sorted(SAMPLES.keys())
+
+if len(SAMPLE_NAMES) == 0:
+    raise ValueError(
+        "No paired FASTQ files found in /input. "
+        "Expected pattern: <sample>_1.fq[.gz] and <sample>_2.fq[.gz]"
+    )
+
+# ---------------------------------------------------------------------------
+# Target rule
+# ---------------------------------------------------------------------------
+rule all:
+    input:
+        expand("/output/{sample}/stage4_sort2_ranked.tsv", sample=SAMPLE_NAMES),
+        expand("/output/{sample}/summary.txt", sample=SAMPLE_NAMES),
+        "/output/group_comparison.tsv"
+
+# ---------------------------------------------------------------------------
+# Per-sample AptaSelect
+# ---------------------------------------------------------------------------
+rule aptaselect:
+    input:
+        r1=lambda wc: SAMPLES[wc.sample]["r1"],
+        r2=lambda wc: SAMPLES[wc.sample]["r2"]
+    output:
+        s1="/output/{sample}/stage1_joined_ranked.tsv",
+        s2="/output/{sample}/stage2_selection_ranked.tsv",
+        s3="/output/{sample}/stage3_sort1_ranked.tsv",
+        s4="/output/{sample}/stage4_sort2_ranked.tsv",
+        summary="/output/{sample}/summary.txt"
+    params:
+        library_mode="--long-mode" if config.get("long_mode", False) else "--short-mode",
+        min_overlap=config.get("min_overlap", 6),
+        max_mismatch_pct=config.get("max_mismatch_pct", 0.08),
+        max_mismatches=config.get("max_mismatches", 1),
+        sel_left=config.get("sel_left", "CCACTTCTCCTTCCATCCTAAAC"),
+        sel_right=config.get("sel_right", "GAGTAGTTTGGAGGGTTGTCTG"),
+        sort1_left=config.get("sort1_left", "TCCTAAAC"),
+        sort1_right=config.get("sort1_right", "GAGTAGTT"),
+        sort2_left=config.get("sort2_left", "TCTCTCTCTC"),
+        sort2_right=config.get("sort2_right", "GAGAGAGAGA"),
+        sort2_between=config.get("sort2_between_length", 20),
+        chunk_size=config.get("chunk_size", 10000)
+    log:
+        "/output/{sample}/aptaselect.log"
+    shell:
+        """
+        python /pipeline/scripts/aptaselect.py \
+            --r1 {input.r1} \
+            --r2 {input.r2} \
+            --outdir /output/{wildcards.sample} \
+            {params.library_mode} \
+            --min-overlap {params.min_overlap} \
+            --max-mismatch-pct {params.max_mismatch_pct} \
+            --max-mismatches {params.max_mismatches} \
+            --sel-left {params.sel_left} \
+            --sel-right {params.sel_right} \
+            --sort1-left {params.sort1_left} \
+            --sort1-right {params.sort1_right} \
+            --sort2-left {params.sort2_left} \
+            --sort2-right {params.sort2_right} \
+            --sort2-between-length {params.sort2_between} \
+            --chunk-size {params.chunk_size} \
+            2>&1 | tee {log}
+        """
+
+# ---------------------------------------------------------------------------
+# Group comparison on Stage 4 results
+# ---------------------------------------------------------------------------
+rule group_comparison:
+    input:
+        expand("/output/{sample}/stage4_sort2_ranked.tsv", sample=SAMPLE_NAMES)
+    output:
+        "/output/group_comparison.tsv"
+    params:
+        groups=config.get("groups", {}),
+        samples=SAMPLE_NAMES
+    run:
+        import csv
+        from collections import defaultdict
+
+        group_map = params.groups if params.groups else {}
+        sample_list = params.samples
+
+        # Assign groups
+        sample_to_group = {}
+        for s in sample_list:
+            sample_to_group[s] = group_map.get(s, "ungrouped")
+
+        groups_set = sorted(set(sample_to_group.values()))
+
+        # Read stage4 results per sample: sequence -> count
+        sample_counts = {}
+        for s in sample_list:
+            counts = {}
+            tsv_path = f"/output/{s}/stage4_sort2_ranked.tsv"
+            with open(tsv_path) as f:
+                reader = csv.DictReader(f, delimiter="\t")
+                for row in reader:
+                    counts[row["sequence"]] = int(row["count"])
+            sample_counts[s] = counts
+
+        # Collect all sequences across samples
+        all_seqs = set()
+        for counts in sample_counts.values():
+            all_seqs.update(counts.keys())
+
+        # Aggregate by group: sum counts per sequence
+        group_totals = {g: defaultdict(int) for g in groups_set}
+        group_sample_count = defaultdict(int)
+        for s in sample_list:
+            g = sample_to_group[s]
+            group_sample_count[g] += 1
+            for seq, cnt in sample_counts[s].items():
+                group_totals[g][seq] += cnt
+
+        # Build comparison table
+        rows = []
+        for seq in all_seqs:
+            row = {"sequence": seq}
+            for g in groups_set:
+                row[f"{g}_total_count"] = group_totals[g].get(seq, 0)
+                row[f"{g}_mean_count"] = (
+                    group_totals[g].get(seq, 0) / group_sample_count[g]
+                    if group_sample_count[g] > 0 else 0
+                )
+            # Fold change between first two groups (if exactly 2 groups)
+            if len(groups_set) == 2:
+                g1, g2 = groups_set
+                c1 = group_totals[g1].get(seq, 0)
+                c2 = group_totals[g2].get(seq, 0)
+                if c2 > 0:
+                    row["fold_change"] = round(c1 / c2, 4)
+                elif c1 > 0:
+                    row["fold_change"] = float("inf")
+                else:
+                    row["fold_change"] = 0.0
+            rows.append(row)
+
+        # Sort by total count across all groups descending
+        rows.sort(key=lambda r: sum(
+            r.get(f"{g}_total_count", 0) for g in groups_set
+        ), reverse=True)
+
+        # Write output
+        fieldnames = ["sequence"]
+        for g in groups_set:
+            fieldnames.extend([f"{g}_total_count", f"{g}_mean_count"])
+        if len(groups_set) == 2:
+            fieldnames.append("fold_change")
+
+        with open(output[0], "w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter="\t")
+            writer.writeheader()
+            writer.writerows(rows)
