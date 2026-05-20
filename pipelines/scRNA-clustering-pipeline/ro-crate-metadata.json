@@ -123,5 +123,6 @@
       "encodingFormat": "text/csv",
       "name": "csv"
     }
-  ]
+  ],
+  "version": "1.0.0"
 }
