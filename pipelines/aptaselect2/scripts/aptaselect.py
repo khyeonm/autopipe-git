@@ -339,7 +339,7 @@ def main():
     # Stage 4: 2nd Sort patterns
     parser.add_argument("--sort2-left", default="TCTCTCTCTC",
                         help="2nd Sort left pattern")
-    parser.add_argument("--sort2-right", default="GAGAGAGAGA",
+    parser.add_argument("--sort2-right", default="AGAGAGAGAG",
                         help="2nd Sort right pattern")
     parser.add_argument("--sort2-between-length", type=int, default=30,
                         help="Required between-length for 2nd Sort (default: 30)")

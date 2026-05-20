@@ -67,7 +67,7 @@ rule aptaselect:
         sort1_left=config.get("sort1_left", "TCCTAAAC"),
         sort1_right=config.get("sort1_right", "GAGTAGTT"),
         sort2_left=config.get("sort2_left", "TCTCTCTCTC"),
-        sort2_right=config.get("sort2_right", "GAGAGAGAGA"),
+        sort2_right=config.get("sort2_right", "AGAGAGAGAG"),
         sort2_between=config.get("sort2_between_length", 30),
         chunk_size=config.get("chunk_size", 10000)
     log:

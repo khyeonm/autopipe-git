@@ -33,7 +33,7 @@ sort1_right: "GAGTAGTT"
 
 # Stage 4: 2nd Sort Filtering patterns
 sort2_left: "TCTCTCTCTC"
-sort2_right: "GAGAGAGAGA"
+sort2_right: "AGAGAGAGAG"
 sort2_between_length: 30
 
 # Processing chunk size
