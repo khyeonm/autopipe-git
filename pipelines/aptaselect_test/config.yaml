@@ -1,0 +1,40 @@
+# AptaSelect Pipeline Configuration (Multi-sample)
+# ==================================================
+
+# Sample-to-group mapping
+# Keys: sample prefix (part before _1.fq / _2.fq)
+# Values: group label for comparison
+# Files are auto-detected from /input directory by *_1.fq* and *_2.fq* pattern.
+# Samples not listed here are assigned to group "ungrouped".
+groups:
+  # example:
+  # sampleA: "round3"
+  # sampleB: "round3"
+  # sampleC: "round5"
+  # sampleD: "round5"
+
+# Library mode
+long_mode: false
+
+# Stage 1: Join parameters
+min_overlap: 6
+max_mismatch_pct: 0.08
+
+# Pattern matching mismatch tolerance
+max_mismatches: 5
+
+# Stage 2: Selection Filtering patterns
+sel_left: "CCACTTCTCCTTCCATCCTAAAC"
+sel_right: "GAGTAGTTTGGAGGGTTGTCTG"
+
+# Stage 3: 1st Sort Filtering patterns
+sort1_left: "TCCTAAAC"
+sort1_right: "GAGTAGTT"
+
+# Stage 4: 2nd Sort Filtering patterns
+sort2_left: "TCTCTCTCTC"
+sort2_right: "AGAGAGAGAG"
+sort2_between_length: 30
+
+# Processing chunk size
+chunk_size: 10000
