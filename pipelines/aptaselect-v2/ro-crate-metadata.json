@@ -23,7 +23,7 @@
           "@id": "#author"
         }
       ],
-      "dateCreated": "2026-05-19",
+      "dateCreated": "2026-05-20",
       "description": "Multi-sample version of AptaSelect. Automatically detects paired-end FASTQ files from the input directory, runs the AptaSelect pipeline (Join, Selection, 1st Sort, 2nd Sort, Aggregation & Ranking) independently per sample, and generates a group comparison table on Stage 4 results based on user-defined group assignments.",
       "input": [
         {
@@ -34,7 +34,7 @@
         }
       ],
       "isBasedOn": {
-        "@id": "https://hub.autopipe.org/pipelines/80"
+        "@id": "https://hub.autopipe.org/pipelines/102"
       },
       "keywords": [
         "aptamer",

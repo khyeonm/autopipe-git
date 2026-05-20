@@ -21,7 +21,7 @@ min_overlap: 6
 max_mismatch_pct: 0.08
 
 # Pattern matching mismatch tolerance
-max_mismatches: 10
+max_mismatches: 5
 
 # Stage 2: Selection Filtering patterns
 sel_left: "CCACTTCTCCTTCCATCCTAAAC"
