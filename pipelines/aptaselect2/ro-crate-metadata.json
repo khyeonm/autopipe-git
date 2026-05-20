@@ -67,7 +67,7 @@
         "@id": "https://hub.autopipe.org"
       },
       "softwareRequirements": [],
-      "version": "1.0.0"
+      "version": "1.0.1"
     },
     {
       "@id": "#author",
@@ -111,5 +111,5 @@
       "name": "Group comparison table (TSV)"
     }
   ],
-  "version": "1.0.0"
+  "version": "1.0.1"
 }
