@@ -1,0 +1,115 @@
+# =============================================================================
+# Snakefile for scRNA-clustering-pipeline
+# Single-cell RNA-seq analysis with Scanpy
+# =============================================================================
+
+configfile: "config.yaml"
+
+# Input/output paths from config
+INPUT_FILE = config["input_file"]
+OUTPUT_DIR = config["output_dir"]
+SCRIPTS_DIR = "/pipeline/scripts"
+
+# QC metrics file
+QC_METRICS = f"{OUTPUT_DIR}/qc_metrics.csv"
+QC_PLOTS = f"{OUTPUT_DIR}/qc_plots.pdf"
+
+# Filtered h5ad after QC
+FILTERED_H5AD = f"{OUTPUT_DIR}/filtered.h5ad"
+
+# Normalized h5ad
+NORMALIZED_H5AD = f"{OUTPUT_DIR}/normalized.h5ad"
+
+# PCA results
+PCA_H5AD = f"{OUTPUT_DIR}/pca.h5ad"
+PCA_PLOTS = f"{OUTPUT_DIR}/pca_plots.pdf"
+
+# Clustering and UMAP results
+FINAL_H5AD = f"{OUTPUT_DIR}/final.h5ad"
+CLUSTERING_PLOTS = f"{OUTPUT_DIR}/clustering_plots.pdf"
+
+# Summary report
+SUMMARY_REPORT = f"{OUTPUT_DIR}/summary_report.txt"
+
+# =============================================================================
+# Rule: all - Final output
+# =============================================================================
+rule all:
+    input:
+        QC_METRICS,
+        QC_PLOTS,
+        FILTERED_H5AD,
+        NORMALIZED_H5AD,
+        PCA_H5AD,
+        PCA_PLOTS,
+        FINAL_H5AD,
+        CLUSTERING_PLOTS,
+        SUMMARY_REPORT
+
+# =============================================================================
+# Rule: qc - Quality Control
+# =============================================================================
+rule qc:
+    output:
+        QC_METRICS,
+        QC_PLOTS,
+        temp(FILTERED_H5AD)
+    log:
+        f"{OUTPUT_DIR}/qc.log"
+    script:
+        f"{SCRIPTS_DIR}/qc.py"
+
+# =============================================================================
+# Rule: normalize - Normalization and HVG selection
+# =============================================================================
+rule normalize:
+    input:
+        FILTERED_H5AD
+    output:
+        NORMALIZED_H5AD
+    log:
+        f"{OUTPUT_DIR}/normalize.log"
+    script:
+        f"{SCRIPTS_DIR}/normalize.py"
+
+# =============================================================================
+# Rule: pca - Principal Component Analysis
+# =============================================================================
+rule pca:
+    input:
+        NORMALIZED_H5AD
+    output:
+        PCA_H5AD,
+        PCA_PLOTS
+    log:
+        f"{OUTPUT_DIR}/pca.log"
+    script:
+        f"{SCRIPTS_DIR}/pca.py"
+
+# =============================================================================
+# Rule: cluster - Leiden clustering and UMAP
+# =============================================================================
+rule cluster:
+    input:
+        PCA_H5AD
+    output:
+        FINAL_H5AD,
+        CLUSTERING_PLOTS
+    log:
+        f"{OUTPUT_DIR}/clustering.log"
+    script:
+        f"{SCRIPTS_DIR}/clustering.py"
+
+# =============================================================================
+# Rule: summary - Generate summary report
+# =============================================================================
+rule summary:
+    input:
+        FINAL_H5AD,
+        QC_METRICS
+    output:
+        SUMMARY_REPORT
+    log:
+        f"{OUTPUT_DIR}/summary.log"
+    script:
+        f"{SCRIPTS_DIR}/summary.py"

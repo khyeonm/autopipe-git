@@ -1,0 +1,127 @@
+{
+  "@context": "https://w3id.org/ro/crate/1.1/context",
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "about": {
+        "@id": "./"
+      },
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": [
+        "Dataset",
+        "SoftwareSourceCode",
+        "ComputationalWorkflow"
+      ],
+      "creator": [
+        {
+          "@id": "#author"
+        }
+      ],
+      "dateCreated": "2026-05-20",
+      "description": "Scanpy-based single-cell RNA-seq analysis pipeline for mouse scRNA-seq data. Includes QC, normalization, HVG selection, PCA, Leiden clustering, and UMAP visualization.",
+      "input": [
+        {
+          "@id": "#input-h5ad"
+        }
+      ],
+      "keywords": [
+        "scRNA-seq",
+        "single-cell",
+        "clustering",
+        "Leiden",
+        "UMAP",
+        "Scanpy",
+        "mouse"
+      ],
+      "license": {
+        "@id": "https://spdx.org/licenses/MIT"
+      },
+      "name": "scRNA-clustering-pipeline",
+      "output": [
+        {
+          "@id": "#output-h5ad"
+        },
+        {
+          "@id": "#output-pdf"
+        },
+        {
+          "@id": "#output-csv"
+        }
+      ],
+      "programmingLanguage": {
+        "@id": "#snakemake"
+      },
+      "sdPublisher": {
+        "@id": "https://hub.autopipe.org"
+      },
+      "softwareRequirements": [
+        {
+          "@id": "#scanpy"
+        },
+        {
+          "@id": "#leidenalg"
+        },
+        {
+          "@id": "#umap"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "@id": "#author",
+      "@type": "Person",
+      "name": "khyeonm"
+    },
+    {
+      "@id": "#snakemake",
+      "@type": "ComputerLanguage",
+      "name": "Snakemake",
+      "url": "https://snakemake.readthedocs.io"
+    },
+    {
+      "@id": "#scanpy",
+      "@type": "SoftwareApplication",
+      "name": "Scanpy"
+    },
+    {
+      "@id": "#leidenalg",
+      "@type": "SoftwareApplication",
+      "name": "Leidenalg"
+    },
+    {
+      "@id": "#umap",
+      "@type": "SoftwareApplication",
+      "name": "UMAP"
+    },
+    {
+      "@id": "#input-h5ad",
+      "@type": "FormalParameter",
+      "encodingFormat": "application/x-hdf5",
+      "name": "h5ad"
+    },
+    {
+      "@id": "#output-h5ad",
+      "@type": "FormalParameter",
+      "encodingFormat": "application/x-hdf5",
+      "name": "h5ad"
+    },
+    {
+      "@id": "#output-pdf",
+      "@type": "FormalParameter",
+      "encodingFormat": "application/pdf",
+      "name": "pdf"
+    },
+    {
+      "@id": "#output-csv",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/csv",
+      "name": "csv"
+    }
+  ]
+}

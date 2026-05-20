@@ -1,0 +1,60 @@
+# =============================================================================
+# config.yaml for scRNA-clustering-pipeline
+# =============================================================================
+
+# Input/output paths (Docker mount points)
+input_file: "/input/10k.h5ad"
+output_dir: "/output"
+
+# =============================================================================
+# Quality Control Parameters
+# =============================================================================
+qc:
+    # Minimum number of genes detected per cell
+    min_genes: 200
+    # Maximum number of genes detected per cell
+    max_genes: 6000
+    # Maximum percentage of mitochondrial gene expression
+    max_mito_percent: 20
+    # Mitochondrial gene prefix (mouse = mt-, human = MT-)
+    mito_prefix: "mt-"
+
+# =============================================================================
+# Normalization Parameters
+# =============================================================================
+normalize:
+    # Normalization method: 'log1p' (default, highly recommended)
+    method: "log1p"
+    # Number of highly variable genes to select
+    n_hvg: 2000
+    # Flavor for HVG selection: 'seurat_v3' (recommended) or 'cell_ranger'
+    hvg_flavor: "seurat_v3"
+
+# =============================================================================
+# PCA Parameters
+# =============================================================================
+pca:
+    # Number of principal components
+    n_components: 30
+
+# =============================================================================
+# Clustering Parameters
+# =============================================================================
+clustering:
+    # Number of neighbors for kNN graph
+    n_neighbors: 15
+    # Leiden resolution parameter (higher = more clusters)
+    resolution: 0.5
+    # Random seed for reproducibility
+    random_state: 42
+
+# =============================================================================
+# UMAP Parameters
+# =============================================================================
+umap:
+    # Minimum distance for UMAP
+    min_dist: 0.3
+    # Number of neighbors for UMAP
+    n_neighbors: 15
+    # Random seed for reproducibility
+    random_state: 42
