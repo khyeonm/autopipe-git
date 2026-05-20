@@ -341,8 +341,8 @@ def main():
                         help="2nd Sort left pattern")
     parser.add_argument("--sort2-right", default="GAGAGAGAGA",
                         help="2nd Sort right pattern")
-    parser.add_argument("--sort2-between-length", type=int, default=20,
-                        help="Required between-length for 2nd Sort (default: 20)")
+    parser.add_argument("--sort2-between-length", type=int, default=30,
+                        help="Required between-length for 2nd Sort (default: 30)")
 
     # Chunk size
     parser.add_argument("--chunk-size", type=int, default=10000,

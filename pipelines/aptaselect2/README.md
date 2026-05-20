@@ -61,5 +61,5 @@ Samples not listed in `groups` are assigned to "ungrouped".
 | `sel_left` / `sel_right` | see config | Selection primer patterns |
 | `sort1_left` / `sort1_right` | see config | 1st Sort primer patterns |
 | `sort2_left` / `sort2_right` | see config | 2nd Sort primer patterns |
-| `sort2_between_length` | `20` | Required between-length for 2nd sort |
+| `sort2_between_length` | `30` | Required between-length for 2nd sort |
 | `chunk_size` | `10000` | Processing chunk size |
