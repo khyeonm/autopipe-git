@@ -1,12 +1,79 @@
 configfile: "config.yaml"
 
+# ============================================================================
+# Appended motif-analysis (MEME) configuration + safety guard
+# ----------------------------------------------------------------------------
+# The count-sorting pipeline (rule aptaselect, below) is UNCHANGED. The block
+# here only decides which extra targets get wired into `rule all`, and refuses
+# to run MEME on blank values.
+# ============================================================================
+try:
+    from snakemake.exceptions import WorkflowError
+except Exception:  # older/newer snakemake fallbacks
+    WorkflowError = RuntimeError
+
+
+def _nonblank(v):
+    return str(v).strip() != ""
+
+
+RUN_MEME = bool(config.get("run_meme", False))
+MOTIFS_GIVEN = (
+    _nonblank(config.get("core_flank5", "")) and
+    _nonblank(config.get("core_flank3", "")) and
+    _nonblank(config.get("core_gap", ""))
+)
+
+# Safety guard: never run MEME on blank motif/gap values. No defaults exist for
+# these, so if MEME is switched on before they are filled in, stop immediately.
+if RUN_MEME and not MOTIFS_GIVEN:
+    raise WorkflowError(
+        "run_meme is enabled but core_flank5 / core_flank3 / core_gap are blank. "
+        "These have no defaults. Fill in all three in config.yaml to run the motif "
+        "analysis, or set run_meme: false to run only the count-sorting stages."
+    )
+
+# core_gap must be an integer bp length when the motif step is active.
+CORE_GAP = None
+if MOTIFS_GIVEN:
+    try:
+        CORE_GAP = int(str(config.get("core_gap")).strip())
+    except ValueError:
+        raise WorkflowError(
+            "core_gap must be an integer bp length; got: %r" % config.get("core_gap")
+        )
+
+# MEME motif width, capped so it never exceeds the variable-core length.
+MEME_MAXW = int(config.get("meme_maxw", 20))
+MEME_MINW = int(config.get("meme_minw", 6))
+if CORE_GAP is not None:
+    MEME_MAXW = min(MEME_MAXW, CORE_GAP)
+    MEME_MINW = min(MEME_MINW, MEME_MAXW)
+
+# --- Targets --------------------------------------------------------------
+# Count-sorting outputs are ALWAYS produced (aptaselect, unchanged).
+APTASELECT_OUTPUTS = [
+    "/output/stage1_joined_ranked.tsv",
+    "/output/stage2_selection_ranked.tsv",
+    "/output/stage3_sort1_ranked.tsv",
+    "/output/stage4_sort2_ranked.tsv",
+    "/output/summary.txt",
+]
+
+# The variable-core FASTA is a DEFAULT output whenever the motif/gap values are
+# supplied — even if MEME is not run — so it can be uploaded to the MEME website
+# by hand. MEME's own results (meme_out) are added only when run_meme is on.
+MOTIF_OUTPUTS = []
+if MOTIFS_GIVEN:
+    MOTIF_OUTPUTS.append("/output/variable_cores.fasta")
+    if RUN_MEME:
+        MOTIF_OUTPUTS.append("/output/meme_out/meme.html")
+
+
 rule all:
     input:
-        "/output/stage1_joined_ranked.tsv",
-        "/output/stage2_selection_ranked.tsv",
-        "/output/stage3_sort1_ranked.tsv",
-        "/output/stage4_sort2_ranked.tsv",
-        "/output/summary.txt"
+        APTASELECT_OUTPUTS + MOTIF_OUTPUTS
+
 
 rule aptaselect:
     """Run the full AptaSelect pipeline: Join, Selection, Sort1, Sort2, Aggregate & Rank."""
@@ -52,5 +119,87 @@ rule aptaselect:
             --sort2-right {params.sort2_right} \
             --sort2-between-length {params.sort2_between} \
             --chunk-size {params.chunk_size} \
+            2>&1 | tee {log}
+        """
+
+
+# ============================================================================
+# Appended step 1/2: extract the variable core between the two flanking motifs
+# ============================================================================
+rule extract_cores:
+    """Take the top-ranked count-sorted sequences and write ONLY the variable
+    core (the region between core_flank5 and core_flank3, of length core_gap) to
+    a FASTA. Primers and other fixed regions are excluded. How many top-ranked
+    sequences are used: top_percent (a percentage) when set, otherwise top_n.
+    Produced whenever the motif/gap values are given, independent of MEME."""
+    input:
+        ranked="/output/" + config.get("top_seq_source", "stage4_sort2_ranked.tsv")
+    output:
+        fasta="/output/variable_cores.fasta"
+    params:
+        flank5=config.get("core_flank5", ""),
+        flank3=config.get("core_flank3", ""),
+        gap=config.get("core_gap", ""),
+        top_n=config.get("top_n", 100),
+        top_percent=config.get("top_percent", ""),
+        flank_mm=config.get("flank_max_mismatches", 0)
+    log:
+        "/output/extract_cores.log"
+    shell:
+        """
+        set -euo pipefail
+        python /pipeline/scripts/extract_cores.py \
+            --input {input.ranked} \
+            --output {output.fasta} \
+            --flank5 '{params.flank5}' \
+            --flank3 '{params.flank3}' \
+            --gap '{params.gap}' \
+            --top-n {params.top_n} \
+            --top-percent '{params.top_percent}' \
+            --flank-max-mismatches {params.flank_mm} \
+            2>&1 | tee {log}
+        """
+
+
+# ============================================================================
+# Appended step 2/2: run MEME on the extracted cores to find the shared motif
+# ============================================================================
+rule meme:
+    """Run MEME on the variable cores. MEME lives in its own conda env and is
+    called by full path; run single-process (no -p) so it never spawns MPI
+    daemons. Results go to /output/meme_out (separate folder — earlier
+    count-sorting results are left untouched)."""
+    input:
+        fasta="/output/variable_cores.fasta"
+    output:
+        html="/output/meme_out/meme.html"
+    params:
+        nmotifs=config.get("meme_nmotifs", 5),
+        mod=config.get("meme_mod", "zoops"),
+        minw=MEME_MINW,
+        maxw=MEME_MAXW,
+        revcomp="-revcomp" if config.get("meme_revcomp", False) else ""
+    log:
+        "/output/meme.log"
+    shell:
+        """
+        set -euo pipefail
+        # Refuse to run MEME on an empty core set (e.g. wrong flanks/gap length).
+        if ! grep -q '^>' {input.fasta}; then
+            echo "ERROR: {input.fasta} contains no sequences; not running MEME. Check core_flank5 / core_flank3 / core_gap." >&2
+            exit 1
+        fi
+        # Put the MEME env's bin on PATH so MEME finds ghostscript (gs) for PNG
+        # logo output, then call MEME by full path from that isolated env.
+        export PATH=/opt/conda/envs/meme/bin:$PATH
+        /opt/conda/envs/meme/bin/meme {input.fasta} \
+            -dna \
+            -oc /output/meme_out \
+            -mod {params.mod} \
+            -nmotifs {params.nmotifs} \
+            -minw {params.minw} \
+            -maxw {params.maxw} \
+            {params.revcomp} \
+            -nostatus \
             2>&1 | tee {log}
         """

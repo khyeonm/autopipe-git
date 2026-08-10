@@ -24,7 +24,7 @@
         }
       ],
       "dateCreated": "2026-04-03",
-      "description": "AptaSelect identifies high-frequency aptamer candidate sequences from paired-end FASTQ files produced by SELEX experiments. The pipeline joins paired-end reads, applies three sequential pattern-based filtering stages (Selection, 1st Sort, 2nd Sort), and aggregates and ranks sequences by frequency at each stage.",
+      "description": "AptaSelect identifies high-frequency aptamer candidate sequences from paired-end FASTQ files produced by SELEX experiments. The pipeline joins paired-end reads, applies three sequential pattern-based filtering stages (Selection, 1st Sort, 2nd Sort), and aggregates and ranks sequences by frequency at each stage. An optional motif-analysis step extracts the variable core between two experiment-specific flanking motifs from the top-ranked sequences, writes those cores to FASTA, and runs MEME to discover the shared motif.",
       "input": [
         {
           "@id": "#input-r1"
@@ -41,7 +41,9 @@
         "SELEX",
         "paired-end",
         "sequence-analysis",
-        "enrichment"
+        "enrichment",
+        "motif",
+        "MEME"
       ],
       "license": {
         "@id": "https://spdx.org/licenses/MIT"
@@ -53,6 +55,12 @@
         },
         {
           "@id": "#output-summary"
+        },
+        {
+          "@id": "#output-cores-fasta"
+        },
+        {
+          "@id": "#output-meme"
         }
       ],
       "programmingLanguage": {
@@ -61,19 +69,30 @@
       "sdPublisher": {
         "@id": "https://hub.autopipe.org"
       },
-      "softwareRequirements": [],
-      "version": "1.0.0"
+      "softwareRequirements": [
+        {
+          "@id": "#meme"
+        }
+      ],
+      "version": "1.1.0"
     },
     {
       "@id": "#author",
       "@type": "Person",
-      "name": ""
+      "name": "khyeonm"
     },
     {
       "@id": "#snakemake",
       "@type": "ComputerLanguage",
       "name": "Snakemake",
       "url": "https://snakemake.readthedocs.io"
+    },
+    {
+      "@id": "#meme",
+      "@type": "SoftwareApplication",
+      "name": "MEME",
+      "url": "https://meme-suite.org",
+      "version": "5.5.9"
     },
     {
       "@id": "#input-r1",
@@ -98,7 +117,19 @@
       "@type": "FormalParameter",
       "encodingFormat": "text/plain",
       "name": "Pipeline summary statistics"
+    },
+    {
+      "@id": "#output-cores-fasta",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/x-fasta",
+      "name": "Variable cores extracted between the two flanking motifs (FASTA)"
+    },
+    {
+      "@id": "#output-meme",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/html",
+      "name": "MEME motif-discovery results (meme_out)"
     }
   ],
-  "version": "1.0.0"
+  "version": "1.1.0"
 }
