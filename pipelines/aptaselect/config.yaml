@@ -29,53 +29,42 @@ sort2_left: "TCTCTCTCTC"
 sort2_right: "GAGAGAGAGA"
 sort2_between_length: 20  # Required between-length in bp
 
-# Processing chunk size
+# Processing chunk size (batching only; does not affect results)
 chunk_size: 10000
+
+# ============================================================================
+# Parallel execution (OPT 1: multi-core)
+# ============================================================================
+# Number of worker processes. 0 (or blank/negative) = auto-detect the cores
+# actually allocated to THIS process (respects container cpuset / CFS quota),
+# not the machine total. Set a positive integer to override.
+n_cores: 0
+
+# Unit of work distribution: number of read PAIRS handed to a worker at a time.
+# Independent of chunk_size. Results are identical regardless of this value; if
+# it is set too large there are fewer units than cores and some cores sit idle.
+work_unit_size: 10000
 
 # ============================================================================
 # Motif analysis (MEME) step   —   APPENDED, runs AFTER the count sorting above
 # ============================================================================
-# This step takes the top count-ranked sequences, extracts the variable core
-# that sits between two known flanking motifs, and (optionally) runs MEME to
-# discover the shared motif inside those cores.
-#
-# It ships DISABLED and with the required values BLANK on purpose:
-#   * run_meme: false          -> only the count-sorting stages above run.
-#   * core_flank5/3, core_gap  -> blank, NO defaults. Every user must supply
-#                                 their own experiment-specific values.
-# With the values blank the motif step does not run at all. If run_meme is set
-# to true while any of the three values is still blank, the pipeline refuses to
-# start (see the guard in the Snakefile) — nothing runs on stale values.
-
 # Master switch for the MEME motif-discovery step.
 run_meme: false
 
 # ---- REQUIRED for the motif step (NO defaults — fill in per experiment) ----
-# The two known constant motifs that flank the variable (randomised) core, and
-# the exact length in bp of that core (the "gap" between the two motifs).
-# Feed MEME only this core: primers and other fixed regions are excluded.
 core_flank5: ""     # 5' motif immediately BEFORE the variable core
 core_flank3: ""     # 3' motif immediately AFTER  the variable core
 core_gap:    ""     # exact length (bp) of the variable core between the flanks
 
 # ---- Adjustable parameters (sensible defaults; change as you like) ----
-# Which count-sorted table to pull the top sequences from.
 top_seq_source: "stage4_sort2_ranked.tsv"
-# Percentage of the ranked sequences to use, highest-ranked first. When SET,
-# this OVERRIDES top_n. When left BLANK (the default), top_n is used instead.
-# Example: top_percent: 5 uses the top 5% of ranked sequences.
 top_percent: ""
-# How many top-ranked sequences to feed into core extraction.
 top_n: 100
-# Mismatches allowed when locating each flank. 0 = exact match (recommended).
-# NOTE: values > 0 can shift the core boundary near homopolymer runs and change
-# the extracted core length — use with care.
 flank_max_mismatches: 0
 
 # ---- MEME parameters (adjustable) ----
-meme_nmotifs: 5         # number of motifs for MEME to find
-meme_mod: "zoops"       # site distribution: oops | zoops | anr
-meme_minw: 6            # minimum motif width
-meme_maxw: 20           # maximum motif width
-meme_revcomp: false     # also search the reverse-complement strand
-                        # (usually false for single-stranded DNA/RNA aptamers)
+meme_nmotifs: 5
+meme_mod: "zoops"
+meme_minw: 6
+meme_maxw: 20
+meme_revcomp: false

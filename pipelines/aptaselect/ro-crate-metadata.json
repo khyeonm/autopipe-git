@@ -34,7 +34,7 @@
         }
       ],
       "isBasedOn": {
-        "@id": ""
+        "@id": "https://hub.autopipe.org/pipelines/115"
       },
       "keywords": [
         "aptamer",
@@ -74,7 +74,7 @@
           "@id": "#meme"
         }
       ],
-      "version": "1.0.1"
+      "version": "1.0.2"
     },
     {
       "@id": "#author",
@@ -131,5 +131,5 @@
       "name": "MEME motif-discovery results (meme_out)"
     }
   ],
-  "version": "1.0.1"
+  "version": "1.0.2"
 }
