@@ -4,40 +4,79 @@
     {
       "@id": "ro-crate-metadata.json",
       "@type": "CreativeWork",
-      "about": {"@id": "./"},
-      "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"}
+      "about": {
+        "@id": "./"
+      },
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      }
     },
     {
       "@id": "./",
-      "@type": ["Dataset", "SoftwareSourceCode", "ComputationalWorkflow"],
+      "@type": [
+        "Dataset",
+        "SoftwareSourceCode",
+        "ComputationalWorkflow"
+      ],
       "name": "ssam-spatial-celltyping",
       "description": "Cell segmentation-free spatial cell-type inference using SSAM (Spot-based Spatial cell-type Analysis by Multidimensional mRNA density estimation). Applies KDE to single-molecule mRNA coordinates and maps pixel-level gene expression vectors to cell-type signatures, producing a spatial cell-type map and abundance statistics.",
-      "version": "1.0.1",
-      "license": {"@id": "https://spdx.org/licenses/AGPL-3.0"},
-      "programmingLanguage": {"@id": "#snakemake"},
-      "creator": [{"@id": "#author"}],
+      "version": "1.0.2",
+      "license": {
+        "@id": "https://spdx.org/licenses/AGPL-3.0"
+      },
+      "programmingLanguage": {
+        "@id": "#snakemake"
+      },
+      "creator": [
+        {
+          "@id": "#author"
+        }
+      ],
       "dateCreated": "2026-03-10",
-      "sdPublisher": {"@id": "https://hub.autopipe.org"},
-      "isBasedOn": {"@id": "https://github.com/pnucolab/ssam"},
+      "sdPublisher": {
+        "@id": "https://hub.autopipe.org"
+      },
+      "isBasedOn": {
+        "@id": "https://github.com/pnucolab/ssam"
+      },
       "softwareRequirements": [
-        {"@id": "#ssam"},
-        {"@id": "#scanpy"},
-        {"@id": "#anndata"}
+        {
+          "@id": "#ssam"
+        },
+        {
+          "@id": "#scanpy"
+        },
+        {
+          "@id": "#anndata"
+        }
       ],
       "input": [
-        {"@id": "#input-coordinates"},
-        {"@id": "#input-signatures"}
+        {
+          "@id": "#input-coordinates"
+        }
       ],
       "output": [
-        {"@id": "#output-h5ad"},
-        {"@id": "#output-celltype-map"},
-        {"@id": "#output-kde-map"},
-        {"@id": "#output-abundance"}
+        {
+          "@id": "#output-celltype-map"
+        },
+        {
+          "@id": "#output-kde-map"
+        },
+        {
+          "@id": "#output-abundance"
+        }
       ],
       "keywords": [
-        "spatial-transcriptomics", "SSAM", "cell-type-mapping",
-        "KDE", "segmentation-free", "smFISH", "MERFISH", "seqFISH",
-        "single-molecule", "spatial-omics"
+        "spatial-transcriptomics",
+        "SSAM",
+        "cell-type-mapping",
+        "KDE",
+        "segmentation-free",
+        "smFISH",
+        "MERFISH",
+        "seqFISH",
+        "single-molecule",
+        "spatial-omics"
       ]
     },
     {
@@ -70,22 +109,9 @@
     {
       "@id": "#input-coordinates",
       "@type": "FormalParameter",
-      "name": "coordinates.csv",
+      "name": "spot_table.csv",
       "encodingFormat": "text/csv",
-      "description": "mRNA molecule coordinates: columns gene, x, y"
-    },
-    {
-      "@id": "#input-signatures",
-      "@type": "FormalParameter",
-      "name": "signatures.csv",
-      "encodingFormat": "text/csv",
-      "description": "Cell-type gene expression signatures: rows=cell types, columns=genes"
-    },
-    {
-      "@id": "#output-h5ad",
-      "@type": "FormalParameter",
-      "name": "ssam_result.h5ad",
-      "encodingFormat": "application/x-hdf5"
+      "description": "Single-molecule mRNA spot table: columns gene, x, y (column names auto-detected)"
     },
     {
       "@id": "#output-celltype-map",
@@ -107,4 +133,3 @@
     }
   ]
 }
-

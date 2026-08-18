@@ -13,11 +13,15 @@ rule run_ssam:
         abundance = "/output/celltype_abundance.csv"
     threads: config["threads"]
     params:
-        csv        = config["csv"],
-        bandwidth  = config["bandwidth"],
-        threshold  = config["threshold"],
-        map_width  = config["map_width"],
-        resolution = config["resolution"],
+        csv         = config["csv"],
+        bandwidth   = config["bandwidth"],
+        sampling    = config["sampling_distance"],
+        search_size = config["search_size"],
+        resolution  = config["resolution"],
+        min_norm    = config["min_norm"],
+        # Optional norm-threshold override; empty string -> canonical default.
+        norm_arg    = (f"--norm-threshold {config['norm_threshold']}"
+                       if str(config.get("norm_threshold", "")).strip() != "" else ""),
     log:
         "/output/ssam.log"
     shell:
@@ -26,9 +30,11 @@ rule run_ssam:
             --csv {params.csv} \
             --output-dir /output \
             --bandwidth {params.bandwidth} \
-            --threshold {params.threshold} \
-            --map-width {params.map_width} \
-            --threads {threads} \
+            --sampling-distance {params.sampling} \
+            --search-size {params.search_size} \
             --resolution {params.resolution} \
+            --min-norm {params.min_norm} \
+            --threads {threads} \
+            {params.norm_arg} \
             2>&1 | tee {log}
         """

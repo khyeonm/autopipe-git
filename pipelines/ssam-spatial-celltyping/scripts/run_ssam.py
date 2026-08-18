@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-SSAM pipeline script — uses pnucolab/ssam API (github.com/pnucolab/ssam)
+SSAM pipeline script — follows the official pnucolab/ssam workflow
+(github.com/pnucolab/ssam, docs/tldr.rst).
 """
 
 import argparse
@@ -59,33 +60,8 @@ def load_from_csv(coord_path):
     return df
 
 
-def find_localmax_safe(analysis, threshold):
-    """
-    Call find_localmax with the correct keyword argument.
-    The pnucolab/ssam API accepts either 'min_norm' or 'norm_thres'
-    depending on the version. We try both.
-    """
-    import inspect
-    sig = inspect.signature(analysis.find_localmax)
-    params = list(sig.parameters.keys())
-    print(f"[SSAM] find_localmax signature params: {params}")
-
-    if "min_norm" in params:
-        analysis.find_localmax(min_norm=threshold)
-    elif "norm_thres" in params:
-        analysis.find_localmax(norm_thres=threshold)
-    elif "threshold" in params:
-        analysis.find_localmax(threshold=threshold)
-    else:
-        print(f"[SSAM] Warning: unknown find_localmax params {params}, trying positional.")
-        analysis.find_localmax(threshold)
-
-
 def check_store_ready(store_path):
-    """
-    Check which stages are already completed in ssam_store.
-    Returns a dict of {stage: bool}.
-    """
+    """Check which stages are already completed in ssam_store."""
     def has_data(subdir):
         p = os.path.join(store_path, subdir)
         if not os.path.isdir(p):
@@ -105,11 +81,21 @@ def main():
     parser = argparse.ArgumentParser(description="SSAM spatial analysis (pnucolab/ssam)")
     parser.add_argument("--csv",         required=True,  help="Spot table CSV")
     parser.add_argument("--output-dir",  required=True)
-    parser.add_argument("--bandwidth",   type=float, default=2.5)
-    parser.add_argument("--threshold",   type=float, default=0.5)
-    parser.add_argument("--map-width",   type=int,   default=1000)
-    parser.add_argument("--threads",     type=int,   default=4)
-    parser.add_argument("--resolution",  type=float, default=0.6)
+    parser.add_argument("--bandwidth",   type=float, default=2.5,
+                        help="KDE bandwidth in micrometers (ssam default: 2.5).")
+    parser.add_argument("--sampling-distance", type=float, default=1.0,
+                        help="KDE grid spacing in micrometers/pixel (ssam default: 1.0).")
+    parser.add_argument("--norm-threshold", type=float, default=None,
+                        help="Optional norm-threshold override for local-maxima detection. "
+                             "If omitted, SSAM's canonical bandwidth-derived default is used "
+                             "(norm_threshold = 2 / (sqrt(2*pi)*bandwidth)**ndim).")
+    parser.add_argument("--search-size", type=int, default=3,
+                        help="find_localmax search neighborhood size in pixels (ssam default: 3).")
+    parser.add_argument("--resolution",  type=float, default=0.6,
+                        help="Leiden clustering resolution (canonical: 0.6).")
+    parser.add_argument("--min-norm",    type=float, default=0.05,
+                        help="filter_celltypemaps min_norm (canonical: 0.05).")
+    parser.add_argument("--threads",     type=int, default=4)
     args = parser.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
@@ -120,24 +106,25 @@ def main():
     print(f"[SSAM] Store status — KDE: {ready['kde']}, LocalMax: {ready['localmax']}, "
           f"Normalized: {ready['normalized']}, Scaled: {ready['scaled']}")
 
-    # ── 1. Load data (needed for KDE; skip if KDE already done) ──────────────
     import ssam
     ds       = ssam.SSAMDataset(store_path)
     analysis = ssam.SSAMAnalysis(ds, ncores=args.threads, verbose=True)
 
+    # ── 1. KDE (real micrometer coordinates; grid spacing = sampling_distance) ──
     if not ready["kde"]:
         df = load_from_csv(args.csv)
 
-        um_per_pixel = 0.1
-        df["x"] = (df["x"] - df["x"].min()) * um_per_pixel + 10
-        df["y"] = (df["y"] - df["y"].min()) * um_per_pixel + 10
-
-        width  = df["x"].max() - df["x"].min() + 10
-        height = df["y"].max() - df["y"].min() + 10
-        sampling_distance = 1.0
+        # Canonical ssam: normalize coordinates and keep the REAL scale (bandwidth
+        # is in the same units as x/y), tissue size = max coordinate.
+        df["x"] = df["x"] - df["x"].min()
+        df["y"] = df["y"] - df["y"].min()
+        width  = float(df["x"].max())
+        height = float(df["y"].max())
+        sampling_distance = args.sampling_distance
 
         print(f"[SSAM] Tissue size (µm): {width:.1f} × {height:.1f}")
-        print(f"[SSAM] Map: {args.map_width} px wide, sampling={sampling_distance:.4f} µm/px")
+        print(f"[SSAM] sampling={sampling_distance} µm/px, bandwidth={args.bandwidth} µm "
+              f"-> grid ~{int(width/sampling_distance)} x {int(height/sampling_distance)} px")
 
         df_indexed = df.set_index("gene")
 
@@ -153,14 +140,23 @@ def main():
     else:
         print("[SSAM] ✓ KDE already done — skipping.")
 
-    # ── 4. Find local maxima ──────────────────────────────────────────────────
+    # ── 2. Find local maxima (canonical bandwidth-derived threshold; optional override) ──
     if not ready["localmax"]:
-        print(f"[SSAM] Finding local maxima (threshold={args.threshold}) ...")
-        find_localmax_safe(analysis, args.threshold)
+        # Canonical ssam relies on the bandwidth-derived thresholds that run_kde
+        # sets (norm_threshold = 2 / (sqrt(2*pi)*bandwidth)**ndim). Only override
+        # when the user explicitly provides one. NOTE: in ssam 1.1.0 find_localmax's
+        # only positional arg is `search_size`, NOT a threshold, so any threshold
+        # MUST go through set_thresholds() -- never positionally into find_localmax().
+        if args.norm_threshold is not None:
+            analysis.set_thresholds(norm_threshold=args.norm_threshold)
+            print(f"[SSAM] Finding local maxima (norm_threshold override={args.norm_threshold}) ...")
+        else:
+            print("[SSAM] Finding local maxima (canonical bandwidth-derived threshold) ...")
+        analysis.find_localmax(search_size=args.search_size)
     else:
-        print(f"[SSAM] ✓ Local maxima already found — skipping. (threshold={args.threshold})")
+        print(f"[SSAM] ✓ Local maxima already found — skipping.")
 
-    # ── 5. Normalise & scale vectors ──────────────────────────────────────────
+    # ── 3. Normalise & scale vectors ─────────────────────────────────────────────
     if not ready["normalized"]:
         print("[SSAM] Normalising vectors ...")
         analysis.normalize_vectors()
@@ -173,14 +169,17 @@ def main():
     else:
         print("[SSAM] ✓ Scaling already done — skipping.")
 
-    # ── 6. Cluster & map cell types (unsupervised) ────────────────────────────
+    # ── 4. Cluster & map cell types (de novo), then filter (official workflow) ───
     print(f"[SSAM] Clustering vectors (resolution={args.resolution}) ...")
     analysis.cluster_vectors(resolution=args.resolution, metric="correlation")
 
     print("[SSAM] Mapping cell types ...")
     analysis.map_celltypes()
 
-    # ── 7. Save KDE map ───────────────────────────────────────────────────────
+    print(f"[SSAM] Filtering cell-type map (min_norm={args.min_norm}) ...")
+    analysis.filter_celltypemaps(min_norm=args.min_norm)
+
+    # ── 5. Save KDE map ──────────────────────────────────────────────────────────
     print("[SSAM] Saving KDE map ...")
     vf_norm = np.array(ds.vf_norm).squeeze()
     fig, ax = plt.subplots(figsize=(10, 10))
@@ -193,9 +192,9 @@ def main():
     plt.savefig(os.path.join(args.output_dir, "kde_map.png"), dpi=150)
     plt.close()
 
-    # ── 8. Save cell-type map ─────────────────────────────────────────────────
+    # ── 6. Save cell-type map (use the FILTERED map) ─────────────────────────────
     print("[SSAM] Saving cell-type map ...")
-    ct_map = np.array(ds.celltype_maps).squeeze()
+    ct_map = np.array(ds.filtered_celltype_maps).squeeze()
     n_types = int(ct_map.max()) + 1
     cmap = plt.get_cmap("tab20", n_types + 1)
     fig, ax = plt.subplots(figsize=(12, 12))
@@ -209,7 +208,7 @@ def main():
     plt.savefig(os.path.join(args.output_dir, "celltype_map.png"), dpi=150)
     plt.close()
 
-    # ── 9. Abundance table ────────────────────────────────────────────────────
+    # ── 7. Abundance table ───────────────────────────────────────────────────────
     print("[SSAM] Computing abundance ...")
     valid  = ct_map[ct_map >= 0]
     counts = np.bincount(valid, minlength=n_types)
@@ -226,4 +225,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

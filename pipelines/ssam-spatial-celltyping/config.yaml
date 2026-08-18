@@ -1,24 +1,33 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# SSAM pipeline config — smFISH Allen dataset (CSV mode)
-# Uses pnucolab/ssam API: github.com/pnucolab/ssam
+# SSAM pipeline config — follows the canonical pnucolab/ssam workflow
+# (github.com/pnucolab/ssam, docs/tldr.rst). Defaults match the reference values.
 # ─────────────────────────────────────────────────────────────────────────────
 
 # Spot table CSV path (inside container: /input/...)
 csv: "/input/s3_spot_table.csv"
 
-# KDE bandwidth in micrometers (2.5 µm = ~10 µm FWTM for Gaussian kernel)
+# KDE bandwidth in micrometers (canonical default: 2.5)
 bandwidth: 2.5
 
-# Expression threshold — local maxima with norm below this are discarded
-# Raised from 0.2 → 0.5 to reduce vector count and avoid OOM during clustering
-threshold: 0.5
+# KDE grid spacing in micrometers per pixel (canonical default: 1.0).
+# Increase (e.g. 2.0) for a coarser grid and lower memory on large tissues.
+sampling_distance: 1.0
 
-# Output map width in pixels
-map_width: 1000
+# Norm threshold for local-maxima detection.
+# Leave empty ("") to use SSAM's canonical default, which run_kde derives from
+# bandwidth: norm_threshold = 2 / (sqrt(2*pi) * bandwidth) ** 2  (~0.051 at bw=2.5).
+# Set a number to override it (applied via analysis.set_thresholds).
+norm_threshold: ""
 
-# Leiden clustering resolution (higher → more clusters)
+# find_localmax search neighborhood size in pixels (canonical default: 3)
+search_size: 3
+
+# Leiden clustering resolution (canonical default: 0.6; higher -> more clusters)
 resolution: 0.6
+
+# filter_celltypemaps min_norm — background masking; drops cell-type pixels
+# whose vector-field norm is below this (canonical default: 0.05)
+min_norm: 0.05
 
 # Number of CPU threads
 threads: 4
-
