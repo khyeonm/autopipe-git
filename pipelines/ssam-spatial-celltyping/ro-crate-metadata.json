@@ -4,86 +4,41 @@
     {
       "@id": "ro-crate-metadata.json",
       "@type": "CreativeWork",
-      "about": {
-        "@id": "./"
-      },
-      "conformsTo": {
-        "@id": "https://w3id.org/ro/crate/1.1"
-      }
+      "about": {"@id": "./"},
+      "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"}
     },
     {
       "@id": "./",
-      "@type": [
-        "Dataset",
-        "SoftwareSourceCode",
-        "ComputationalWorkflow"
-      ],
-      "creator": [
-        {
-          "@id": "#author"
-        }
-      ],
-      "dateCreated": "2026-03-10",
-      "description": "Cell segmentation-free spatial cell-type inference using SSAM (Spot-based Spatial cell-type Analysis by Multidimensional mRNA density estimation). Applies KDE to single-molecule mRNA coordinates and maps pixel-level gene expression vectors to cell-type signatures, producing a spatial cell-type map and abundance statistics.",
-      "input": [
-        {
-          "@id": "#input-coordinates"
-        },
-        {
-          "@id": "#input-signatures"
-        }
-      ],
-      "isBasedOn": {
-        "@id": "https://github.com/pnucolab/ssam"
-      },
-      "keywords": [
-        "spatial-transcriptomics",
-        "SSAM",
-        "cell-type-mapping",
-        "KDE",
-        "segmentation-free",
-        "smFISH",
-        "MERFISH",
-        "seqFISH",
-        "single-molecule",
-        "spatial-omics"
-      ],
-      "license": {
-        "@id": "https://spdx.org/licenses/AGPL-3.0"
-      },
+      "@type": ["Dataset", "SoftwareSourceCode", "ComputationalWorkflow"],
       "name": "ssam-spatial-celltyping",
-      "output": [
-        {
-          "@id": "#output-h5ad"
-        },
-        {
-          "@id": "#output-celltype-map"
-        },
-        {
-          "@id": "#output-kde-map"
-        },
-        {
-          "@id": "#output-abundance"
-        }
-      ],
-      "programmingLanguage": {
-        "@id": "#snakemake"
-      },
-      "sdPublisher": {
-        "@id": "https://hub.autopipe.org"
-      },
+      "description": "Cell segmentation-free spatial cell-type inference using SSAM (Spot-based Spatial cell-type Analysis by Multidimensional mRNA density estimation). Applies KDE to single-molecule mRNA coordinates and maps pixel-level gene expression vectors to cell-type signatures, producing a spatial cell-type map and abundance statistics.",
+      "version": "1.0.1",
+      "license": {"@id": "https://spdx.org/licenses/AGPL-3.0"},
+      "programmingLanguage": {"@id": "#snakemake"},
+      "creator": [{"@id": "#author"}],
+      "dateCreated": "2026-03-10",
+      "sdPublisher": {"@id": "https://hub.autopipe.org"},
+      "isBasedOn": {"@id": "https://github.com/pnucolab/ssam"},
       "softwareRequirements": [
-        {
-          "@id": "#ssam"
-        },
-        {
-          "@id": "#scanpy"
-        },
-        {
-          "@id": "#anndata"
-        }
+        {"@id": "#ssam"},
+        {"@id": "#scanpy"},
+        {"@id": "#anndata"}
       ],
-      "version": "1.0.0"
+      "input": [
+        {"@id": "#input-coordinates"},
+        {"@id": "#input-signatures"}
+      ],
+      "output": [
+        {"@id": "#output-h5ad"},
+        {"@id": "#output-celltype-map"},
+        {"@id": "#output-kde-map"},
+        {"@id": "#output-abundance"}
+      ],
+      "keywords": [
+        "spatial-transcriptomics", "SSAM", "cell-type-mapping",
+        "KDE", "segmentation-free", "smFISH", "MERFISH", "seqFISH",
+        "single-molecule", "spatial-omics"
+      ]
     },
     {
       "@id": "#author",
@@ -115,41 +70,41 @@
     {
       "@id": "#input-coordinates",
       "@type": "FormalParameter",
-      "description": "mRNA molecule coordinates: columns gene, x, y",
+      "name": "coordinates.csv",
       "encodingFormat": "text/csv",
-      "name": "coordinates.csv"
+      "description": "mRNA molecule coordinates: columns gene, x, y"
     },
     {
       "@id": "#input-signatures",
       "@type": "FormalParameter",
-      "description": "Cell-type gene expression signatures: rows=cell types, columns=genes",
+      "name": "signatures.csv",
       "encodingFormat": "text/csv",
-      "name": "signatures.csv"
+      "description": "Cell-type gene expression signatures: rows=cell types, columns=genes"
     },
     {
       "@id": "#output-h5ad",
       "@type": "FormalParameter",
-      "encodingFormat": "application/x-hdf5",
-      "name": "ssam_result.h5ad"
+      "name": "ssam_result.h5ad",
+      "encodingFormat": "application/x-hdf5"
     },
     {
       "@id": "#output-celltype-map",
       "@type": "FormalParameter",
-      "encodingFormat": "image/png",
-      "name": "celltype_map.png"
+      "name": "celltype_map.png",
+      "encodingFormat": "image/png"
     },
     {
       "@id": "#output-kde-map",
       "@type": "FormalParameter",
-      "encodingFormat": "image/png",
-      "name": "kde_map.png"
+      "name": "kde_map.png",
+      "encodingFormat": "image/png"
     },
     {
       "@id": "#output-abundance",
       "@type": "FormalParameter",
-      "encodingFormat": "text/csv",
-      "name": "celltype_abundance.csv"
+      "name": "celltype_abundance.csv",
+      "encodingFormat": "text/csv"
     }
-  ],
-  "version": "1.0.0"
+  ]
 }
+
