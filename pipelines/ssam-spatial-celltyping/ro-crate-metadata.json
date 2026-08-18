@@ -20,7 +20,7 @@
       ],
       "name": "ssam-spatial-celltyping",
       "description": "Cell segmentation-free spatial cell-type inference using SSAM (Spot-based Spatial cell-type Analysis by Multidimensional mRNA density estimation). Applies KDE to single-molecule mRNA coordinates and maps pixel-level gene expression vectors to cell-type signatures, producing a spatial cell-type map and abundance statistics.",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "license": {
         "@id": "https://spdx.org/licenses/AGPL-3.0"
       },

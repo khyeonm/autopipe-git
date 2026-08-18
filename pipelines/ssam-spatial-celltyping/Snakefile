@@ -19,6 +19,9 @@ rule run_ssam:
         search_size = config["search_size"],
         resolution  = config["resolution"],
         min_norm    = config["min_norm"],
+        outlier_min_r = config["outlier_min_r"],
+        filter_min_r  = config["filter_min_r"],
+        no_scale_arg  = ("" if config.get("scale_vectors", True) else "--no-scale"),
         # Optional norm-threshold override; empty string -> canonical default.
         norm_arg    = (f"--norm-threshold {config['norm_threshold']}"
                        if str(config.get("norm_threshold", "")).strip() != "" else ""),
@@ -34,6 +37,9 @@ rule run_ssam:
             --search-size {params.search_size} \
             --resolution {params.resolution} \
             --min-norm {params.min_norm} \
+            --outlier-min-r {params.outlier_min_r} \
+            --filter-min-r {params.filter_min_r} \
+            {params.no_scale_arg} \
             --threads {threads} \
             {params.norm_arg} \
             2>&1 | tee {log}

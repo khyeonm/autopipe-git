@@ -26,8 +26,18 @@ search_size: 3
 resolution: 0.6
 
 # filter_celltypemaps min_norm — background masking; drops cell-type pixels
-# whose vector-field norm is below this (canonical default: 0.05)
-min_norm: 0.05
+# whose vector-field norm is below this (ssam default: 0.1)
+min_norm: 0.1
+
+# cluster_vectors outlier removal min_r (ssam default 0.8; negative disables outlier removal)
+outlier_min_r: 0.3
+
+# filter_celltypemaps min_r (ssam default 0.6)
+filter_min_r: 0.3
+
+# Run scale_vectors (per-gene standardization). Set false to skip scaling and
+# reuse normalized vectors in its place (scaled_vectors := normalized_vectors).
+scale_vectors: true
 
 # Number of CPU threads
 threads: 4

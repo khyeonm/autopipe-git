@@ -93,8 +93,17 @@ def main():
                         help="find_localmax search neighborhood size in pixels (ssam default: 3).")
     parser.add_argument("--resolution",  type=float, default=0.6,
                         help="Leiden clustering resolution (canonical: 0.6).")
-    parser.add_argument("--min-norm",    type=float, default=0.05,
-                        help="filter_celltypemaps min_norm (canonical: 0.05).")
+    parser.add_argument("--min-norm",    type=float, default=0.1,
+                        help="filter_celltypemaps min_norm (ssam default: 0.1).")
+    parser.add_argument("--outlier-min-r", type=float, default=0.3,
+                        help="cluster_vectors MedoidCorrelation min_r for outlier removal "
+                             "(ssam default 0.8; negative disables outlier removal).")
+    parser.add_argument("--filter-min-r", type=float, default=0.3,
+                        help="filter_celltypemaps min_r (ssam default 0.6).")
+    parser.add_argument("--no-scale", action="store_true",
+                        help="Skip scale_vectors; reuse the normalized vectors in the scaled slots "
+                             "(scaled_vectors := normalized_vectors, vf_scaled := vf_normalized). "
+                             "Deviates from canonical SSAM: no per-gene standardization.")
     parser.add_argument("--threads",     type=int, default=4)
     args = parser.parse_args()
 
@@ -164,20 +173,43 @@ def main():
         print("[SSAM] ✓ Normalization already done — skipping.")
 
     if not ready["scaled"]:
-        print("[SSAM] Scaling vectors ...")
-        analysis.scale_vectors()
+        if args.no_scale:
+            # Skip scale_vectors and let the downstream cluster/map steps read the
+            # already-computed normalized vectors instead (they read scaled_vectors /
+            # vf_scaled). No per-gene standardization is applied.
+            print("[SSAM] --no-scale: reusing normalized vectors as scaled (skipping scale_vectors) ...")
+            ds.scaled_vectors = ds.normalized_vectors
+            ds.vf_scaled = ds.vf_normalized
+        else:
+            print("[SSAM] Scaling vectors ...")
+            analysis.scale_vectors()
     else:
         print("[SSAM] ✓ Scaling already done — skipping.")
 
     # ── 4. Cluster & map cell types (de novo), then filter (official workflow) ───
-    print(f"[SSAM] Clustering vectors (resolution={args.resolution}) ...")
-    analysis.cluster_vectors(resolution=args.resolution, metric="correlation")
+    if args.outlier_min_r < 0:
+        print(f"[SSAM] Clustering vectors (resolution={args.resolution}, outlier removal disabled) ...")
+        analysis.cluster_vectors(resolution=args.resolution, metric="correlation",
+                                 outlier_detection_method=None)
+    else:
+        print(f"[SSAM] Clustering vectors (resolution={args.resolution}, "
+              f"outlier min_r={args.outlier_min_r}) ...")
+        analysis.cluster_vectors(resolution=args.resolution, metric="correlation",
+                                 outlier_detection_kwargs={"min_r": args.outlier_min_r})
+
+    if len(np.asarray(ds.centroids)) == 0:
+        sys.exit(
+            "[SSAM] ERROR: clustering produced 0 clusters, so every downstream output would be "
+            "empty. This normally means the outlier filter removed all vectors -- lower "
+            "--outlier-min-r (currently %s), or set it negative to disable outlier removal."
+            % args.outlier_min_r
+        )
 
     print("[SSAM] Mapping cell types ...")
     analysis.map_celltypes()
 
-    print(f"[SSAM] Filtering cell-type map (min_norm={args.min_norm}) ...")
-    analysis.filter_celltypemaps(min_norm=args.min_norm)
+    print(f"[SSAM] Filtering cell-type map (min_norm={args.min_norm}, min_r={args.filter_min_r}) ...")
+    analysis.filter_celltypemaps(min_norm=args.min_norm, min_r=args.filter_min_r)
 
     # ── 5. Save KDE map ──────────────────────────────────────────────────────────
     print("[SSAM] Saving KDE map ...")
@@ -196,9 +228,12 @@ def main():
     print("[SSAM] Saving cell-type map ...")
     ct_map = np.array(ds.filtered_celltype_maps).squeeze()
     n_types = int(ct_map.max()) + 1
-    cmap = plt.get_cmap("tab20", n_types + 1)
+    # Mask background/unassigned pixels (-1) so they render neutral, not as cluster 0.
+    ct_masked = np.ma.masked_less(ct_map, 0)
+    cmap = plt.get_cmap("tab20", n_types).copy()
+    cmap.set_bad("#ffffff")
     fig, ax = plt.subplots(figsize=(12, 12))
-    im = ax.imshow(ct_map.T, cmap=cmap, vmin=-0.5, vmax=n_types - 0.5, origin="lower")
+    im = ax.imshow(ct_masked.T, cmap=cmap, vmin=-0.5, vmax=n_types - 0.5, origin="lower")
     cbar = plt.colorbar(im, ax=ax, ticks=range(n_types))
     cbar.ax.set_yticklabels([f"Cluster {i}" for i in range(n_types)], fontsize=7)
     ax.set_title("Cell-type Map (SSAM)")
