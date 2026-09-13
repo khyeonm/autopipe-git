@@ -100,5 +100,6 @@
       "encodingFormat": "text/tab-separated-values",
       "name": "survival_summary"
     }
-  ]
+  ],
+  "version": "1.0.0"
 }
