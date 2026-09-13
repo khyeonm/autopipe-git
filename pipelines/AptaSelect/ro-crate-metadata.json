@@ -117,5 +117,6 @@
       "encodingFormat": "text/tab-separated-values",
       "name": "survival_summary.tsv"
     }
-  ]
+  ],
+  "version": "1.0.0"
 }
