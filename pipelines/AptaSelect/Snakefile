@@ -1,0 +1,59 @@
+configfile: "config.yaml"
+
+# AptaSelect — identify high-frequency aptamer candidates from paired-end SELEX
+# FASTQ files via three sequential filtering stages plus aggregation/ranking.
+# R1 and R2 are each treated as their own sequence and pooled per stage.
+#
+# All pattern sequences, mismatch tolerances and lengths come from config.yaml;
+# nothing about the library design is hard-coded. The overall insert length is
+# derived inside the script from the configured pieces.
+
+rule all:
+    input:
+        "/output/stage1_matching.ranked.tsv",
+        "/output/stage2_flanking.ranked.tsv",
+        "/output/stage3_random_region.ranked.tsv",
+        "/output/survival_summary.tsv"
+
+rule aptaselect:
+    """Run all three stages (matching -> flanking extraction -> N extraction)
+    and write one ranked TSV per stage plus a per-stage survival summary."""
+    input:
+        r1=config["r1"],
+        r2=config["r2"]
+    output:
+        stage1="/output/stage1_matching.ranked.tsv",
+        stage2="/output/stage2_flanking.ranked.tsv",
+        stage3="/output/stage3_random_region.ranked.tsv",
+        summary="/output/survival_summary.tsv"
+    params:
+        lcr=config["lcr"],
+        rcr=config["rcr"],
+        lcr_rcr_mismatch=config["lcr_rcr_mismatch"],
+        left_marker=config["left_marker"],
+        right_marker=config["right_marker"],
+        left_stem=config["left_stem"],
+        right_stem=config["right_stem"],
+        random_region_length=config["random_region_length"]
+    log:
+        "/output/logs/aptaselect.log"
+    shell:
+        """
+        mkdir -p /output/logs
+        python /pipeline/scripts/aptaselect.py \
+            --r1 {input.r1} \
+            --r2 {input.r2} \
+            --lcr {params.lcr} \
+            --rcr {params.rcr} \
+            --lcr-rcr-mismatch {params.lcr_rcr_mismatch} \
+            --left-marker {params.left_marker} \
+            --right-marker {params.right_marker} \
+            --left-stem {params.left_stem} \
+            --right-stem {params.right_stem} \
+            --random-region-length {params.random_region_length} \
+            --out-stage1 {output.stage1} \
+            --out-stage2 {output.stage2} \
+            --out-stage3 {output.stage3} \
+            --summary {output.summary} \
+            2> {log}
+        """

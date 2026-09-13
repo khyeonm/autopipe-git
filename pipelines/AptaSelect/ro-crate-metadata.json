@@ -1,0 +1,121 @@
+{
+  "@context": "https://w3id.org/ro/crate/1.1/context",
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "about": {
+        "@id": "./"
+      },
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": [
+        "Dataset",
+        "SoftwareSourceCode",
+        "ComputationalWorkflow"
+      ],
+      "creator": [
+        {
+          "@id": "#author"
+        }
+      ],
+      "dateCreated": "",
+      "description": "Identifies high-frequency aptamer candidate sequences from paired-end FASTQ files produced by SELEX experiments. Runs three sequential filtering stages — (1) matching/orientation by left and right constant regions within a mismatch tolerance, (2) exact-match flanking marker extraction, and (3) random-region (N) extraction requiring exact stems and an exact between-length — followed by aggregation that counts identical survivors and ranks them by descending count with first-seen tie-breaking. R1 and R2 are each treated as their own sequence and pooled per stage. All pattern sequences, mismatch tolerances and lengths are user-configurable; the overall insert length is derived automatically.",
+      "input": [
+        {
+          "@id": "#input-r1"
+        },
+        {
+          "@id": "#input-r2"
+        }
+      ],
+      "isBasedOn": {
+        "@id": ""
+      },
+      "keywords": [
+        "SELEX",
+        "aptamer",
+        "FASTQ",
+        "random-region",
+        "sequence-enrichment",
+        "bioinformatics"
+      ],
+      "license": {
+        "@id": "https://spdx.org/licenses/MIT"
+      },
+      "name": "AptaSelect",
+      "output": [
+        {
+          "@id": "#output-stage1"
+        },
+        {
+          "@id": "#output-stage2"
+        },
+        {
+          "@id": "#output-stage3"
+        },
+        {
+          "@id": "#output-summary"
+        }
+      ],
+      "programmingLanguage": {
+        "@id": "#snakemake"
+      },
+      "sdPublisher": {
+        "@id": "https://hub.autopipe.org"
+      },
+      "version": "1.0.0"
+    },
+    {
+      "@id": "#author",
+      "@type": "Person",
+      "name": "khyeonm"
+    },
+    {
+      "@id": "#snakemake",
+      "@type": "ComputerLanguage",
+      "name": "Snakemake",
+      "url": "https://snakemake.readthedocs.io"
+    },
+    {
+      "@id": "#input-r1",
+      "@type": "FormalParameter",
+      "encodingFormat": "application/x-fastq",
+      "name": "r1"
+    },
+    {
+      "@id": "#input-r2",
+      "@type": "FormalParameter",
+      "encodingFormat": "application/x-fastq",
+      "name": "r2"
+    },
+    {
+      "@id": "#output-stage1",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/tab-separated-values",
+      "name": "stage1_matching.ranked.tsv"
+    },
+    {
+      "@id": "#output-stage2",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/tab-separated-values",
+      "name": "stage2_flanking.ranked.tsv"
+    },
+    {
+      "@id": "#output-stage3",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/tab-separated-values",
+      "name": "stage3_random_region.ranked.tsv"
+    },
+    {
+      "@id": "#output-summary",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/tab-separated-values",
+      "name": "survival_summary.tsv"
+    }
+  ]
+}
