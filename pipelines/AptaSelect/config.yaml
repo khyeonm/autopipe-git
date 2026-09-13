@@ -1,0 +1,23 @@
+# ===========================================================================
+# AptaSelect configuration
+# All values below are user-configurable. The insert layout assumed is:
+#   LCR - left stem - random region (N) - right stem - RCR
+# ===========================================================================
+
+# --- Input files (paired-end SELEX reads) ---
+r1: "/input/test_1.fq"  # Required: paired-end Read 1 FASTQ (.fq/.fastq, optionally .gz)
+r2: "/input/test_2.fq"  # Required: paired-end Read 2 FASTQ (.fq/.fastq, optionally .gz)
+
+# --- Stage 1: Matching / orientation (LCR ... RCR, mismatch-tolerant) ---
+lcr: "CCACTTCTCCTTCCATCCTAAAC"  # Required: left constant region (LCR) sequence, e.g. ACGTACGT
+rcr: "GAGTAGTTTGGAGGGTTGTCTG"  # Required: right constant region (RCR) sequence, e.g. TTTTGGGG
+constant_mismatch: "1"  # Required: max mismatches allowed when matching LCR and RCR (integer, e.g. 1)
+
+# --- Stage 2: Flanking extraction (inner markers, exact match, zero mismatch) ---
+left_marker: "TCCTAAAC"  # Required: short marker at the inner end of the LCR (exact match)
+right_marker: "GAGTAGTT"  # Required: short marker at the inner start of the RCR (exact match)
+
+# --- Stage 3: Random-region (N) extraction (stems exact match, exact N length) ---
+left_stem: "TCTCTCTCTC"  # Required: left stem sequence (exact match)
+right_stem: "GAGAGAGAGA"  # Required: right stem sequence (exact match)
+random_region_length: "22"  # Required: exact length of the random region N (integer)

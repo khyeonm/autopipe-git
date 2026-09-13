@@ -1,0 +1,58 @@
+configfile: "config.yaml"
+
+# ---------------------------------------------------------------------------
+# AptaSelect — identify high-frequency aptamer candidate N-region sequences
+# from paired-end SELEX FASTQ files.
+#
+# All pattern sequences, mismatch tolerances and lengths come from config.yaml;
+# nothing is hard-coded in this workflow or in the processing script.
+# ---------------------------------------------------------------------------
+
+rule all:
+    input:
+        "/output/stage0_raw.ranked.tsv",
+        "/output/stage1_matching.ranked.tsv",
+        "/output/stage2_flanking.ranked.tsv",
+        "/output/stage3_random_region.ranked.tsv",
+        "/output/survival_summary.tsv",
+
+
+rule aptaselect:
+    """Run the three-stage SELEX filter and write all ranked TSV outputs."""
+    input:
+        r1=config["r1"],
+        r2=config["r2"],
+    output:
+        "/output/stage0_raw.ranked.tsv",
+        "/output/stage1_matching.ranked.tsv",
+        "/output/stage2_flanking.ranked.tsv",
+        "/output/stage3_random_region.ranked.tsv",
+        "/output/survival_summary.tsv",
+    params:
+        lcr=config["lcr"],
+        rcr=config["rcr"],
+        constant_mismatch=config["constant_mismatch"],
+        left_marker=config["left_marker"],
+        right_marker=config["right_marker"],
+        left_stem=config["left_stem"],
+        right_stem=config["right_stem"],
+        random_region_length=config["random_region_length"],
+    log:
+        "/output/logs/aptaselect.log",
+    shell:
+        r"""
+        mkdir -p /output/logs
+        python /pipeline/scripts/aptaselect.py \
+            --r1 {input.r1} \
+            --r2 {input.r2} \
+            --outdir /output \
+            --lcr {params.lcr} \
+            --rcr {params.rcr} \
+            --constant-mismatch {params.constant_mismatch} \
+            --left-marker {params.left_marker} \
+            --right-marker {params.right_marker} \
+            --left-stem {params.left_stem} \
+            --right-stem {params.right_stem} \
+            --random-region-length {params.random_region_length} \
+            2> {log}
+        """
