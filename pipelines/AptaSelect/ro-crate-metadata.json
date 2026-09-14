@@ -75,7 +75,7 @@
           "@id": "#meme-suite"
         }
       ],
-      "version": "1.1.0"
+      "version": "1.0.2"
     },
     {
       "@id": "#author",
@@ -131,5 +131,5 @@
       "name": "meme_results"
     }
   ],
-  "version": "1.1.0"
+  "version": "1.0.2"
 }
