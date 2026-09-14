@@ -63,7 +63,7 @@
         "@id": "https://hub.autopipe.org"
       },
       "softwareRequirements": [],
-      "version": "1.1.0"
+      "version": "1.0.1"
     },
     {
       "@id": "#author",
@@ -101,5 +101,5 @@
       "name": "survival_summary"
     }
   ],
-  "version": "1.1.0"
+  "version": "1.0.1"
 }
