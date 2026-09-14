@@ -18,14 +18,37 @@ configfile: "config.yaml"
 JOBS = int(config.get("jobs", 0))
 TASK_SIZE = int(config.get("task_size", 10000))
 
+# --- Motif (MEME) step configuration ---------------------------------------
+# The MEME step is APPENDED after AptaSelect and is OFF by default so nothing
+# runs by accident: run the count sorting first, check stage3, then enable this
+# to run MEME later. When off, only the aptaselect outputs are produced. The
+# top-cores FASTA is ALWAYS a real default output whenever the motif step's
+# outputs are requested, so you can upload it to the MEME website yourself even
+# without running MEME here.
+RUN_MEME = bool(config.get("run_meme", False))
 
-rule all:
-    input:
+
+def target_files():
+    # AptaSelect core outputs — always produced.
+    targets = [
         "/output/stage0_raw.ranked.tsv",
         "/output/stage1_matching.ranked.tsv",
         "/output/stage2_flanking.ranked.tsv",
         "/output/stage3_random_region.ranked.tsv",
         "/output/survival_summary.tsv",
+    ]
+    # Motif step: only pulled into the default run when enabled. The FASTA of
+    # selected top cores and the MEME results are both requested together so the
+    # FASTA is a genuine default output of the enabled motif step.
+    if RUN_MEME:
+        targets.append("/output/top_cores.fasta")
+        targets.append("/output/meme_out/meme.html")
+    return targets
+
+
+rule all:
+    input:
+        target_files(),
 
 
 rule aptaselect:
@@ -71,5 +94,55 @@ rule aptaselect:
             --random-region-length {params.random_region_length} \
             --jobs {params.jobs} \
             --task-size {params.task_size} \
+            2> {log}
+        """
+
+
+# ---------------------------------------------------------------------------
+# APPENDED STEP — Motif analysis (MEME)
+#
+# Consumes ONLY the final ranked random-region table (stage3), which is already
+# trimmed to just the variable random core (primers, constant regions and stems
+# removed). Selects the top-count cores, always writes them to a FASTA default
+# output, and — when run_meme is enabled — runs MEME (plain serial binary, full
+# path, DNA alphabet, no -p/MPI) writing results into /output/meme_out.
+#
+# This rule does NOT modify or re-run the aptaselect stage; it only reads its
+# stage3 output, so the earlier count-sorting results are kept intact.
+# ---------------------------------------------------------------------------
+rule meme_motif:
+    """Select top cores -> FASTA (always) and run MEME (serial) into meme_out."""
+    input:
+        ranked="/output/stage3_random_region.ranked.tsv",
+    output:
+        fasta="/output/top_cores.fasta",
+        meme_html="/output/meme_out/meme.html",
+    params:
+        top_n=int(config.get("meme_top_n", 100)),
+        top_percent=float(config.get("meme_top_percent", 0.0)),
+        nmotifs=int(config.get("meme_nmotifs", 3)),
+        minw=int(config.get("meme_minw", 0)),
+        maxw=int(config.get("meme_maxw", 0)),
+        mod=config.get("meme_mod", "zoops"),
+        meme_bin=config.get("meme_bin", "/opt/meme/bin/meme"),
+        meme_extra=config.get("meme_extra", ""),
+    log:
+        "/output/logs/meme_motif.log",
+    shell:
+        r"""
+        mkdir -p /output/logs /output/meme_out
+        python /pipeline/scripts/run_meme.py \
+            --ranked-tsv {input.ranked} \
+            --fasta-out {output.fasta} \
+            --meme-out-dir /output/meme_out \
+            --top-n {params.top_n} \
+            --top-percent {params.top_percent} \
+            --nmotifs {params.nmotifs} \
+            --minw {params.minw} \
+            --maxw {params.maxw} \
+            --mod {params.mod} \
+            --meme-bin {params.meme_bin} \
+            --meme-extra "{params.meme_extra}" \
+            --run-meme true \
             2> {log}
         """

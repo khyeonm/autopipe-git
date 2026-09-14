@@ -24,7 +24,7 @@
         }
       ],
       "dateCreated": "",
-      "description": "Identifies high-frequency aptamer candidate sequences from paired-end SELEX FASTQ files. Each read mate is processed independently through three sequential filtering stages and survivors are pooled: (1) matching/orientation by left and right constant regions with configurable mismatch tolerance, checking both strands; (2) flanking extraction of the region between inner LCR and RCR markers by exact match; (3) random-region (N) extraction requiring exact stem matches and an exact target length. Each stage's surviving sequences are aggregated by identical sequence and ranked by count (descending, with first-seen tie-breaking). Outputs ranked TSVs for the raw reads and each stage plus a survival summary. All pattern sequences, mismatch tolerances and lengths are user-configurable. This version parallelizes stages 1-3 across worker processes (order-preserving, byte-identical outputs), speeds up mismatch-tolerant matching with a pigeonhole seed-and-verify search, and adds timestamped progress logging to stderr.",
+      "description": "Identifies high-frequency aptamer candidate sequences from paired-end SELEX FASTQ files, then optionally runs MEME motif discovery on the top-ranked random-region cores. Each read mate is processed independently through three sequential filtering stages and survivors are pooled: (1) matching/orientation by left and right constant regions with configurable mismatch tolerance, checking both strands; (2) flanking extraction of the region between inner LCR and RCR markers by exact match; (3) random-region (N) extraction requiring exact stem matches and an exact target length. Each stage's surviving sequences are aggregated by identical sequence and ranked by count (descending, with first-seen tie-breaking). Outputs ranked TSVs for the raw reads and each stage plus a survival summary. An appended motif-analysis step takes the top-count cores straight from the final random-region table (already trimmed to just the variable core, with primers/constant regions/stems removed), always writes them to a FASTA output for upload to the MEME web server, and — when enabled — runs MEME as the plain serial binary (DNA alphabet, no MPI) into a meme_out folder, with ghostscript for PNG logos. The MEME step is off by default so count sorting can be run and checked first without deleting earlier results. The number of top cores (fixed, plus a top-percentage override), motif count, widths and site model are user-configurable. Structural validation of candidate motifs (G-quadruplex / stem-loop, folding energy) is performed separately, not in this pipeline. All pattern sequences, mismatch tolerances and lengths are user-configurable.",
       "input": [
         {
           "@id": "#input-r1"
@@ -42,7 +42,9 @@
         "FASTQ",
         "sequence-analysis",
         "random-region",
-        "paired-end"
+        "paired-end",
+        "motif",
+        "MEME"
       ],
       "license": {
         "@id": "https://spdx.org/licenses/MIT"
@@ -54,6 +56,12 @@
         },
         {
           "@id": "#output-summary-tsv"
+        },
+        {
+          "@id": "#output-top-cores-fasta"
+        },
+        {
+          "@id": "#output-meme-results"
         }
       ],
       "programmingLanguage": {
@@ -62,8 +70,12 @@
       "sdPublisher": {
         "@id": "https://hub.autopipe.org"
       },
-      "softwareRequirements": [],
-      "version": "1.0.1"
+      "softwareRequirements": [
+        {
+          "@id": "#meme-suite"
+        }
+      ],
+      "version": "1.1.0"
     },
     {
       "@id": "#author",
@@ -75,6 +87,12 @@
       "@type": "ComputerLanguage",
       "name": "Snakemake",
       "url": "https://snakemake.readthedocs.io"
+    },
+    {
+      "@id": "#meme-suite",
+      "@type": "SoftwareApplication",
+      "name": "MEME Suite",
+      "url": "https://meme-suite.org"
     },
     {
       "@id": "#input-r1",
@@ -99,7 +117,19 @@
       "@type": "FormalParameter",
       "encodingFormat": "text/tab-separated-values",
       "name": "survival_summary"
+    },
+    {
+      "@id": "#output-top-cores-fasta",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/x-fasta",
+      "name": "top_cores_fasta"
+    },
+    {
+      "@id": "#output-meme-results",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/html",
+      "name": "meme_results"
     }
   ],
-  "version": "1.0.1"
+  "version": "1.1.0"
 }

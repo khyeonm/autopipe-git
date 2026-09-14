@@ -5,23 +5,44 @@
 # ===========================================================================
 
 # --- Input files (paired-end SELEX reads) ---
-r1: "/input/bench_1.fq.gz"  # Required: paired-end Read 1 FASTQ (.fq/.fastq, optionally .gz)
-r2: "/input/bench_2.fq.gz"  # Required: paired-end Read 2 FASTQ (.fq/.fastq, optionally .gz)
+r1: ""  # Required: paired-end Read 1 FASTQ (.fq/.fastq, optionally .gz)
+r2: ""  # Required: paired-end Read 2 FASTQ (.fq/.fastq, optionally .gz)
 
 # --- Stage 1: Matching / orientation (LCR ... RCR, mismatch-tolerant) ---
-lcr: "CCACTTCTCCTTCCATCCTAAAC"  # Required: left constant region (LCR) sequence, e.g. ACGTACGT
-rcr: "GAGTAGTTTGGAGGGTTGTCTG"  # Required: right constant region (RCR) sequence, e.g. TTTTGGGG
-constant_mismatch: "1"  # Required: max mismatches allowed when matching LCR and RCR (integer, e.g. 1)
+lcr: ""  # Required: left constant region (LCR) sequence, e.g. ACGTACGT
+rcr: ""  # Required: right constant region (RCR) sequence, e.g. TTTTGGGG
+constant_mismatch: ""  # Required: max mismatches allowed when matching LCR and RCR (integer, e.g. 1)
 
 # --- Stage 2: Flanking extraction (inner markers, exact match, zero mismatch) ---
-left_marker: "TCCTAAAC"  # Required: short marker at the inner end of the LCR (exact match)
-right_marker: "GAGTAGTT"  # Required: short marker at the inner start of the RCR (exact match)
+left_marker: ""  # Required: short marker at the inner end of the LCR (exact match)
+right_marker: ""  # Required: short marker at the inner start of the RCR (exact match)
 
 # --- Stage 3: Random-region (N) extraction (stems exact match, exact N length) ---
-left_stem: "TCTCTCTCTC"  # Required: left stem sequence (exact match)
-right_stem: "GAGAGAGAGA"  # Required: right stem sequence (exact match)
-random_region_length: "22"  # Required: exact length of the random region N (integer)
+left_stem: ""  # Required: left stem sequence (exact match)
+right_stem: ""  # Required: right stem sequence (exact match)
+random_region_length: ""  # Required: exact length of the random region N (integer)
 
 # --- Parallelism (stages 1-3 are per-read independent) ---
 jobs: 0  # Worker processes. 0 = autodetect cores actually usable by the process (honors container CPU limits). Set a positive integer to override.
 task_size: 10000  # Unit of work distribution: reads per worker task. Independent of chunk_size. Too large -> cores idle (but results stay correct).
+
+# ===========================================================================
+# Motif analysis (MEME) — APPENDED STEP
+# This step is OFF by default: run AptaSelect first, check
+# stage3_random_region.ranked.tsv, then set run_meme: true to run MEME.
+# Input to MEME is ONLY the variable random core from stage3 (primers/constant
+# regions/stems already removed) — feeding constants would bias the motif.
+# ===========================================================================
+run_meme: false  # OFF by default. Set true to enable the MEME step (nothing motif-related runs while false).
+
+# --- How many top-count cores to send to MEME ---
+meme_top_n: 100  # Fixed number of top cores selected from the ranked stage3 table.
+meme_top_percent: 0.0  # If > 0, take this %% of the ranked list instead; <= 0 falls back to meme_top_n.
+
+# --- MEME options ---
+meme_nmotifs: 3  # Number of motifs for MEME to find.
+meme_mod: "zoops"  # Site distribution: oops | zoops | anr.
+meme_minw: 0  # Minimum motif width (0 = MEME default).
+meme_maxw: 0  # Maximum motif width (0 = MEME default).
+meme_bin: "/opt/meme/bin/meme"  # Full path to the SERIAL MEME binary (no -p/MPI is ever used).
+meme_extra: ""  # Optional extra raw args passed straight through to MEME (e.g. "-evt 0.05").
