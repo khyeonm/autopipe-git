@@ -5,8 +5,8 @@
 # ===========================================================================
 
 # --- Input files (paired-end SELEX reads) ---
-r1: "/input/test_1.fq"  # Required: paired-end Read 1 FASTQ (.fq/.fastq, optionally .gz)
-r2: "/input/test_2.fq"  # Required: paired-end Read 2 FASTQ (.fq/.fastq, optionally .gz)
+r1: "/input/bench_1.fq.gz"  # Required: paired-end Read 1 FASTQ (.fq/.fastq, optionally .gz)
+r2: "/input/bench_2.fq.gz"  # Required: paired-end Read 2 FASTQ (.fq/.fastq, optionally .gz)
 
 # --- Stage 1: Matching / orientation (LCR ... RCR, mismatch-tolerant) ---
 lcr: "CCACTTCTCCTTCCATCCTAAAC"  # Required: left constant region (LCR) sequence, e.g. ACGTACGT
@@ -21,3 +21,7 @@ right_marker: "GAGTAGTT"  # Required: short marker at the inner start of the RCR
 left_stem: "TCTCTCTCTC"  # Required: left stem sequence (exact match)
 right_stem: "GAGAGAGAGA"  # Required: right stem sequence (exact match)
 random_region_length: "22"  # Required: exact length of the random region N (integer)
+
+# --- Parallelism (stages 1-3 are per-read independent) ---
+jobs: 0  # Worker processes. 0 = autodetect cores actually usable by the process (honors container CPU limits). Set a positive integer to override.
+task_size: 10000  # Unit of work distribution: reads per worker task. Independent of chunk_size. Too large -> cores idle (but results stay correct).

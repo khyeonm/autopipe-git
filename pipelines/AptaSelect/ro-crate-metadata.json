@@ -24,7 +24,7 @@
         }
       ],
       "dateCreated": "",
-      "description": "Identifies high-frequency aptamer candidate sequences from paired-end SELEX FASTQ files. Each read mate is processed independently through three sequential filtering stages and survivors are pooled: (1) matching/orientation by left and right constant regions with configurable mismatch tolerance, checking both strands; (2) flanking extraction of the region between inner LCR and RCR markers by exact match; (3) random-region (N) extraction requiring exact stem matches and an exact target length. Each stage's surviving sequences are aggregated by identical sequence and ranked by count (descending, with first-seen tie-breaking). Outputs ranked TSVs for the raw reads and each stage plus a survival summary. All pattern sequences, mismatch tolerances and lengths are user-configurable.",
+      "description": "Identifies high-frequency aptamer candidate sequences from paired-end SELEX FASTQ files. Each read mate is processed independently through three sequential filtering stages and survivors are pooled: (1) matching/orientation by left and right constant regions with configurable mismatch tolerance, checking both strands; (2) flanking extraction of the region between inner LCR and RCR markers by exact match; (3) random-region (N) extraction requiring exact stem matches and an exact target length. Each stage's surviving sequences are aggregated by identical sequence and ranked by count (descending, with first-seen tie-breaking). Outputs ranked TSVs for the raw reads and each stage plus a survival summary. All pattern sequences, mismatch tolerances and lengths are user-configurable. This version parallelizes stages 1-3 across worker processes (order-preserving, byte-identical outputs), speeds up mismatch-tolerant matching with a pigeonhole seed-and-verify search, and adds timestamped progress logging to stderr.",
       "input": [
         {
           "@id": "#input-r1"
@@ -34,7 +34,7 @@
         }
       ],
       "isBasedOn": {
-        "@id": ""
+        "@id": "https://hub.autopipe.org/pipelines/135"
       },
       "keywords": [
         "aptamer",
@@ -63,7 +63,7 @@
         "@id": "https://hub.autopipe.org"
       },
       "softwareRequirements": [],
-      "version": "1.0.0"
+      "version": "1.1.0"
     },
     {
       "@id": "#author",
@@ -101,5 +101,5 @@
       "name": "survival_summary"
     }
   ],
-  "version": "1.0.0"
+  "version": "1.1.0"
 }

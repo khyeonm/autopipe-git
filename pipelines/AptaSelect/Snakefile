@@ -8,6 +8,17 @@ configfile: "config.yaml"
 # nothing is hard-coded in this workflow or in the processing script.
 # ---------------------------------------------------------------------------
 
+# --- Parallelism configuration ---------------------------------------------
+# jobs: number of worker processes for stages 1-3.
+#   0 (default) => the script autodetects the cores actually usable by the
+#   process (honors container CPU limits via CPU affinity).
+# task_size: unit of work distribution (reads per worker task); independent of
+#   any chunk_size. Correctness never depends on it, but a value large enough
+#   that all reads fall in one/few tasks leaves cores idle.
+JOBS = int(config.get("jobs", 0))
+TASK_SIZE = int(config.get("task_size", 10000))
+
+
 rule all:
     input:
         "/output/stage0_raw.ranked.tsv",
@@ -37,6 +48,10 @@ rule aptaselect:
         left_stem=config["left_stem"],
         right_stem=config["right_stem"],
         random_region_length=config["random_region_length"],
+        task_size=TASK_SIZE,
+        # If jobs is left at 0 in config, let the script autodetect usable cores.
+        # Otherwise pass the explicit override from config.
+        jobs=JOBS,
     log:
         "/output/logs/aptaselect.log",
     shell:
@@ -54,5 +69,7 @@ rule aptaselect:
             --left-stem {params.left_stem} \
             --right-stem {params.right_stem} \
             --random-region-length {params.random_region_length} \
+            --jobs {params.jobs} \
+            --task-size {params.task_size} \
             2> {log}
         """
