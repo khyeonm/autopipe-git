@@ -1,0 +1,21 @@
+# ---------------- Input FASTQ (paired-end; plain or .gz) ----------------
+r1: ""  # Required: Read 1 FASTQ of the SELEX library (e.g. /input/sample_R1.fastq.gz)
+r2: ""  # Required: Read 2 FASTQ of the SELEX library (e.g. /input/sample_R2.fastq.gz)
+
+# ---------------- Stage 1: constant-region matching (edit distance) ----------------
+lcr_seq: ""  # Required: left constant region (LCR) sequence, 5'->3'
+rcr_seq: ""  # Required: right constant region (RCR) sequence, 5'->3'
+lcr_max_errors: 1  # Required: max edit distance (substitution/insertion/deletion) allowed when finding the LCR
+rcr_max_errors: 1  # Required: max edit distance (substitution/insertion/deletion) allowed when finding the RCR
+
+# ---------------- Stage 2: flanking extraction (exact match) ----------------
+left_marker: ""  # Required: short marker at the inner end of the LCR (exact match)
+right_marker: ""  # Required: short marker at the inner start of the RCR (exact match)
+
+# ---------------- Stage 3: random-region extraction (exact match) ----------------
+left_stem: ""  # Required: left stem sequence flanking the random region (exact match)
+right_stem: ""  # Required: right stem sequence flanking the random region (exact match)
+random_region_length: ""  # Required: exact length (nt) of the random region N between the stems
+
+# ---------------- Runtime ----------------
+threads: 4  # Required: number of CPU worker processes

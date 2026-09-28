@@ -1,0 +1,68 @@
+configfile: "config.yaml"
+
+OUT = "/output"
+
+REQUIRED = ["r1", "r2", "lcr_seq", "rcr_seq", "lcr_max_errors", "rcr_max_errors",
+            "left_marker", "right_marker", "left_stem", "right_stem",
+            "random_region_length", "threads"]
+
+
+def cfg(key):
+    v = config.get(key)
+    return "" if v is None else str(v).strip()
+
+
+_missing = [k for k in REQUIRED if cfg(k) == ""]
+if _missing:
+    raise ValueError("config.yaml: fill in these blank values first: " + ", ".join(_missing))
+
+
+rule all:
+    input:
+        f"{OUT}/stage0_raw.ranked.tsv",
+        f"{OUT}/stage1_matching.ranked.tsv",
+        f"{OUT}/stage2_flanking.ranked.tsv",
+        f"{OUT}/stage3_random_region.ranked.tsv",
+        f"{OUT}/survival_summary.tsv",
+
+
+rule aptaselect:
+    """Stage 0 raw ranking, Stage 1 LCR/RCR matching (edit distance, both strands),
+    Stage 2 marker-flanked extraction, Stage 3 random-region extraction,
+    then per-stage count aggregation, stable ranking and survival summary."""
+    input:
+        r1=cfg("r1"),
+        r2=cfg("r2"),
+        script="/pipeline/scripts/aptaselect.py",
+    output:
+        raw=f"{OUT}/stage0_raw.ranked.tsv",
+        s1=f"{OUT}/stage1_matching.ranked.tsv",
+        s2=f"{OUT}/stage2_flanking.ranked.tsv",
+        s3=f"{OUT}/stage3_random_region.ranked.tsv",
+        summary=f"{OUT}/survival_summary.tsv",
+    params:
+        lcr=cfg("lcr_seq"),
+        rcr=cfg("rcr_seq"),
+        lcr_err=cfg("lcr_max_errors"),
+        rcr_err=cfg("rcr_max_errors"),
+        lm=cfg("left_marker"),
+        rm=cfg("right_marker"),
+        ls=cfg("left_stem"),
+        rs=cfg("right_stem"),
+        nlen=cfg("random_region_length"),
+        outdir=OUT,
+    threads: int(cfg("threads"))
+    log:
+        f"{OUT}/logs/aptaselect.log",
+    shell:
+        """
+        python {input.script} \
+            --r1 {input.r1:q} --r2 {input.r2:q} \
+            --lcr {params.lcr:q} --rcr {params.rcr:q} \
+            --lcr-max-errors {params.lcr_err:q} --rcr-max-errors {params.rcr_err:q} \
+            --left-marker {params.lm:q} --right-marker {params.rm:q} \
+            --left-stem {params.ls:q} --right-stem {params.rs:q} \
+            --random-region-length {params.nlen:q} \
+            --threads {threads} --outdir {params.outdir:q} \
+            2> {log:q}
+        """
