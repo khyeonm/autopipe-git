@@ -27,3 +27,24 @@ batch_size: 2000   # Reads per work unit sent to a worker; results stay identica
 # Progress goes to logs/aptaselect.log only; result files are not affected.
 progress_every: 100000   # Log a progress line every this many reads (0 disables)
 progress_seconds: 60     # Also log a progress line when this many seconds have passed since the last one (0 disables)
+
+# ------------------------------------------- motif analysis (MEME) - add-on step
+# The top-count random-region cores are ALWAYS written to meme_input_top_cores.fasta
+# (top level of the output folder), ready to upload to the MEME website.
+# MEME itself only runs here when run_meme is true; its results go to <output>/meme_out/.
+run_meme: false   # Run MEME in the pipeline (true/false). Off by default: turn on deliberately after checking the count-sorting results; earlier results are kept and not re-run
+meme_top_n: 100          # Number of top-count random-region sequences written to the FASTA / sent to MEME (used when meme_top_percent is blank)
+meme_top_percent:        # Optional: take this percentage (0-100] of the ranked random-region list instead of meme_top_n; blank = use meme_top_n
+meme_nmotifs: 3          # Number of motifs MEME should find
+meme_mod: zoops          # Site distribution: zoops (zero or one site per sequence), oops (exactly one per sequence), anr (any number)
+meme_minw: 6             # Minimum motif width (>= 2)
+meme_maxw: 15            # Maximum motif width (<= random_region_length)
+meme_objfun: classic     # MEME objective function: classic (default), de, se, cd, ce or nc
+meme_revcomp: false      # Also search the reverse-complement strand (false = given strand only, usual for single-stranded aptamers)
+meme_pal: false          # Look only for palindromic motifs (true/false)
+meme_evt:                # Optional: stop when a motif's E-value exceeds this; blank = MEME default
+meme_minsites:           # Optional: minimum number of sites per motif; blank = MEME default
+meme_maxsites:           # Optional: maximum number of sites per motif; blank = MEME default
+meme_markov_order:       # Optional: order of the background Markov model built from the sequences; blank = MEME default
+meme_seed:               # Optional: random seed; blank = MEME default
+meme_extra_args:         # Optional: any other MEME options, e.g. "-time 3600 -searchsize 0" (-p, -o/-oc, -text and alphabet options are not allowed)

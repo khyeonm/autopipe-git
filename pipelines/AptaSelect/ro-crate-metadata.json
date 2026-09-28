@@ -24,7 +24,7 @@
         }
       ],
       "dateCreated": "2026-09-28",
-      "description": "AptaSelect identifies high-frequency aptamer candidate sequences from paired-end SELEX FASTQ files. Each read (R1 and R2 separately) is filtered in three stages: approximate (edit-distance) matching of both constant regions on either strand, exact-marker flanking extraction, and exact-stem random-region extraction at a user-set length. Identical sequences at every stage are counted and stably ranked by frequency. All library-design sequences, tolerances and lengths are configurable. Optimized version: reads are processed by multiple worker processes (core count auto-detected from the process/container allocation, overridable) with results merged in original read order; Stage 1 uses the compiled edlib edit-distance library behind an exact-piece (pigeonhole) prefilter; progress is logged to logs/aptaselect.log. Output files are byte-for-byte identical to version 1.0.0.",
+      "description": "AptaSelect identifies high-frequency aptamer candidate sequences from paired-end SELEX FASTQ files. Each read (R1 and R2 separately) is filtered in three stages: approximate (edit-distance) matching of both constant regions on either strand, exact-marker flanking extraction, and exact-stem random-region extraction at a user-set length. Identical sequences at every stage are counted and stably ranked by frequency. All library-design sequences, tolerances and lengths are configurable. Reads are processed by multiple worker processes with results merged in original read order; Stage 1 uses the compiled edlib edit-distance library behind an exact-piece (pigeonhole) prefilter. Motif add-on: the top-count random-region cores (a fixed number or a top percentage of the ranked list) are always written to a FASTA file, and MEME (DNA alphabet, serial mode, off by default) can be run on them to find shared motifs, with results in meme_out/. The count-sorting outputs are unchanged from version 1.0.1.",
       "input": [
         {
           "@id": "#input-fastq"
@@ -45,7 +45,9 @@
         "edit distance",
         "ranking",
         "multiprocessing",
-        "edlib"
+        "edlib",
+        "motif discovery",
+        "MEME"
       ],
       "license": {
         "@id": "https://spdx.org/licenses/MIT"
@@ -57,6 +59,15 @@
         },
         {
           "@id": "#output-summary-tsv"
+        },
+        {
+          "@id": "#output-top-cores-fasta"
+        },
+        {
+          "@id": "#output-meme-xml"
+        },
+        {
+          "@id": "#output-meme-html"
         }
       ],
       "programmingLanguage": {
@@ -71,9 +82,12 @@
         },
         {
           "@id": "#edlib"
+        },
+        {
+          "@id": "#meme"
         }
       ],
-      "version": "1.0.1"
+      "version": "1.0.2"
     },
     {
       "@id": "#author",
@@ -98,6 +112,13 @@
       "url": "https://github.com/Martinsos/edlib"
     },
     {
+      "@id": "#meme",
+      "@type": "SoftwareApplication",
+      "name": "MEME",
+      "softwareVersion": "5.5.9",
+      "url": "https://meme-suite.org"
+    },
+    {
       "@id": "#input-fastq",
       "@type": "FormalParameter",
       "encodingFormat": "application/x-fastq",
@@ -120,7 +141,25 @@
       "@type": "FormalParameter",
       "encodingFormat": "text/tab-separated-values",
       "name": "survival_summary.tsv"
+    },
+    {
+      "@id": "#output-top-cores-fasta",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/x-fasta",
+      "name": "meme_input_top_cores.fasta"
+    },
+    {
+      "@id": "#output-meme-xml",
+      "@type": "FormalParameter",
+      "encodingFormat": "application/xml",
+      "name": "meme_out/meme.xml"
+    },
+    {
+      "@id": "#output-meme-html",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/html",
+      "name": "meme_out/meme.html"
     }
   ],
-  "version": "1.0.1"
+  "version": "1.0.2"
 }

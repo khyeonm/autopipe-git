@@ -24,9 +24,125 @@ FINAL = [
 _WORKERS = int(config.get("workers", 0) or 0)
 
 
+# ============================================================================
+# Motif-analysis add-on (appended; the AptaSelect rule below is unchanged).
+# The top-count cores FASTA is ALWAYS produced. MEME itself only runs when
+# run_meme is true.
+# ============================================================================
+import shlex
+
+SELECT_SCRIPT = os.path.join(workflow.basedir, "scripts", "select_top_cores.py")
+STAGE3_TABLE = f"{OUT}/stage3_random_region.ranked.tsv"
+TOP_FASTA = f"{OUT}/meme_input_top_cores.fasta"
+MEME_DIR = f"{OUT}/meme_out"
+MEME_ENV_BIN = "/opt/conda/envs/meme/bin"      # MEME's own conda env (see Dockerfile)
+MEME_EXE = f"{MEME_ENV_BIN}/meme"               # always called by full path
+
+
+def _as_bool(value, key):
+    if isinstance(value, bool):
+        return value
+    text = "" if value is None else str(value).strip().lower()
+    if text in ("true", "yes", "on", "1"):
+        return True
+    if text in ("false", "no", "off", "0", ""):
+        return False
+    raise ValueError(f"AptaSelect: {key} must be true or false, got {value!r}")
+
+
+def _opt(value):
+    """None for a blank config value, else the value."""
+    return None if value is None or str(value).strip() == "" else value
+
+
+def _settings_stamp(name, text):
+    """Small file under logs/ holding a step's settings. It is rewritten (new
+    mtime) only when the settings change, so that step - and only that step -
+    re-runs after a settings change even when Snakemake's own run metadata is
+    not kept between runs. The AptaSelect step never depends on it."""
+    path = f"{OUT}/logs/.{name}.settings"
+    try:
+        with open(path) as fh:
+            if fh.read() == text:
+                return path
+    except OSError:
+        pass
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w") as fh:
+        fh.write(text)
+    return path
+
+
+RUN_MEME = _as_bool(config.get("run_meme", False), "run_meme")
+
+_TOP_N = int(config.get("meme_top_n", 100) or 100)
+_TOP_PERCENT = _opt(config.get("meme_top_percent"))
+if _TOP_N < 1:
+    raise ValueError("AptaSelect: meme_top_n must be >= 1")
+if _TOP_PERCENT is not None:
+    _TOP_PERCENT = float(_TOP_PERCENT)
+    if not (0 < _TOP_PERCENT <= 100):
+        raise ValueError("AptaSelect: meme_top_percent must be > 0 and <= 100, or blank to use meme_top_n")
+_SELECT_ARGS = f"--top-n {_TOP_N}" + (f" --top-percent {_TOP_PERCENT:g}" if _TOP_PERCENT is not None else "")
+
+
+def _meme_args():
+    """MEME command-line options from config.yaml (the alphabet is fixed to DNA,
+    the output folder to meme_out, and the parallel option -p is never used)."""
+    mod = str(config.get("meme_mod", "zoops") or "zoops").strip().lower()
+    if mod not in ("oops", "zoops", "anr"):
+        raise ValueError("AptaSelect: meme_mod must be oops, zoops or anr")
+    objfun = str(config.get("meme_objfun", "classic") or "classic").strip().lower()
+    if objfun not in ("classic", "de", "se", "cd", "ce", "nc"):
+        raise ValueError("AptaSelect: meme_objfun must be classic, de, se, cd, ce or nc")
+    nmotifs = int(config.get("meme_nmotifs", 3) or 3)
+    minw = int(config.get("meme_minw", 6) or 6)
+    maxw = int(config.get("meme_maxw", 15) or 15)
+    n_len = int(config["random_region_length"])
+    if nmotifs < 1:
+        raise ValueError("AptaSelect: meme_nmotifs must be >= 1")
+    if not (2 <= minw <= maxw):
+        raise ValueError("AptaSelect: need 2 <= meme_minw <= meme_maxw")
+    if maxw > n_len:
+        raise ValueError(f"AptaSelect: meme_maxw ({maxw}) is longer than the random region "
+                         f"(random_region_length = {n_len}); lower meme_maxw")
+
+    args = ["-mod", mod, "-objfun", objfun, "-nmotifs", str(nmotifs),
+            "-minw", str(minw), "-maxw", str(maxw), "-nostatus"]
+    if _as_bool(config.get("meme_revcomp", False), "meme_revcomp"):
+        args.append("-revcomp")
+    if _as_bool(config.get("meme_pal", False), "meme_pal"):
+        args.append("-pal")
+    for key, flag, cast in (("meme_evt", "-evt", float),
+                            ("meme_minsites", "-minsites", int),
+                            ("meme_maxsites", "-maxsites", int),
+                            ("meme_markov_order", "-markov_order", int),
+                            ("meme_seed", "-seed", int)):
+        value = _opt(config.get(key))
+        if value is not None:
+            args += [flag, str(cast(value))]
+
+    extra = shlex.split(str(_opt(config.get("meme_extra_args")) or ""))
+    forbidden = {"-p", "-o", "-oc", "-text", "-dna", "-rna", "-protein", "-alph"}
+    bad = [tok for tok in extra if tok in forbidden]
+    if bad:
+        raise ValueError("AptaSelect: meme_extra_args may not contain " + ", ".join(bad)
+                         + " (the parallel option -p is disabled; alphabet and output folder are fixed)")
+    return shlex.join(args + extra)
+
+
+MEME_TARGETS = [f"{MEME_DIR}/meme.xml", f"{MEME_DIR}/meme.html"] if RUN_MEME else []
+MEME_ARGS = _meme_args() if RUN_MEME else ""
+
+SELECT_STAMP = _settings_stamp("select_top_cores", _SELECT_ARGS + "\n")
+MEME_STAMP = _settings_stamp("meme", MEME_ARGS + "\n") if RUN_MEME else f"{OUT}/logs/.meme.settings"
+
+
 rule all:
     input:
-        FINAL
+        FINAL,
+        TOP_FASTA,
+        MEME_TARGETS,
 
 
 rule aptaselect:
@@ -70,3 +186,51 @@ rule aptaselect:
         "--workers {params.workers} --max-workers {threads} "
         "--batch-size {params.batch_size} "
         "2> {log:q}"
+
+
+rule select_top_cores:
+    """Take the top-count random-region (N) cores straight from the final ranked
+    table and write them as FASTA - only the variable core, no primers/constant
+    regions/stems. Always produced, whether or not MEME runs."""
+    input:
+        table=STAGE3_TABLE,
+        settings=SELECT_STAMP,
+    output:
+        TOP_FASTA,
+    params:
+        script=SELECT_SCRIPT,
+        args=_SELECT_ARGS,
+    log:
+        f"{OUT}/logs/select_top_cores.log",
+    shell:
+        "python3 {params.script} --table {input.table:q} --out {output:q} {params.args} 2> {log:q}"
+
+
+rule meme:
+    """MEME motif discovery on the selected cores (DNA alphabet), serial mode.
+    Runs only when run_meme is true. Results go to <output>/meme_out/."""
+    input:
+        fasta=TOP_FASTA,
+        settings=MEME_STAMP,
+    output:
+        xml=f"{MEME_DIR}/meme.xml",
+        html=f"{MEME_DIR}/meme.html",
+    params:
+        exe=MEME_EXE,
+        env_bin=MEME_ENV_BIN,
+        outdir=MEME_DIR,
+        args=MEME_ARGS,
+    threads: 1
+    log:
+        f"{OUT}/logs/meme.log",
+    shell:
+        """
+        (
+          if ! grep -q '^>' {input.fasta:q}; then
+            echo "ERROR: {input.fasta} contains no sequences (empty random-region table); nothing to send to MEME" >&2
+            exit 1
+          fi
+          PATH={params.env_bin}:$PATH OMP_NUM_THREADS=1 \
+            {params.exe} {input.fasta:q} -dna -oc {params.outdir:q} {params.args}
+        ) > {log:q} 2>&1
+        """
