@@ -1,0 +1,23 @@
+# ---------------------------------------------------------------- input reads
+r1: "/input/"  # Required: Read 1 FASTQ (.fastq or .fastq.gz); every read is processed as its own sequence
+r2: "/input/"  # Required: Read 2 FASTQ (.fastq or .fastq.gz); every read is processed as its own sequence
+
+# Output folder (Docker mount point); the four ranked tables and survival_summary.tsv are written at its top level
+output_dir: "/output"
+
+# ------------------------------------------- Stage 1: matching (edit distance)
+lcr:   # Required: left constant region (LCR) sequence, A/C/G/T only
+rcr:   # Required: right constant region (RCR) sequence, A/C/G/T only
+max_errors: 1   # Required: max edit distance (substitutions + insertions + deletions) allowed for each of LCR and RCR
+
+# ----------------------------------- Stage 2: flanking extraction (exact match)
+left_marker:    # Required: short marker at the inner (3') end of the LCR, matched exactly
+right_marker:   # Required: short marker at the inner (5') start of the RCR, matched exactly
+
+# ---------------------------------------- Stage 3: random-region (N) extraction
+left_stem:    # Required: left stem sequence, matched exactly
+right_stem:   # Required: right stem sequence, matched exactly
+random_region_length:   # Required: exact random-region (N) length between the stems; insert length = LCR + left stem + N + right stem + RCR
+
+# Log a progress line every this many reads (0 disables)
+progress_every: 100000

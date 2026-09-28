@@ -1,0 +1,114 @@
+{
+  "@context": "https://w3id.org/ro/crate/1.1/context",
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "about": {
+        "@id": "./"
+      },
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": [
+        "Dataset",
+        "SoftwareSourceCode",
+        "ComputationalWorkflow"
+      ],
+      "creator": [
+        {
+          "@id": "#author"
+        }
+      ],
+      "dateCreated": "2026-09-28",
+      "description": "AptaSelect identifies high-frequency aptamer candidate sequences from paired-end SELEX FASTQ files. Each read (R1 and R2 separately) is filtered in three stages: approximate (edit-distance) matching of both constant regions on either strand, exact-marker flanking extraction, and exact-stem random-region extraction at a user-set length. Identical sequences at every stage are counted and stably ranked by frequency. All library-design sequences, tolerances and lengths are configurable. Baseline single-process, pure-Python implementation.",
+      "input": [
+        {
+          "@id": "#input-fastq"
+        },
+        {
+          "@id": "#input-fastq-gz"
+        }
+      ],
+      "isBasedOn": {
+        "@id": ""
+      },
+      "keywords": [
+        "aptamer",
+        "SELEX",
+        "FASTQ",
+        "sequence enrichment",
+        "random region",
+        "edit distance",
+        "ranking"
+      ],
+      "license": {
+        "@id": "https://spdx.org/licenses/MIT"
+      },
+      "name": "AptaSelect",
+      "output": [
+        {
+          "@id": "#output-ranked-tsv"
+        },
+        {
+          "@id": "#output-summary-tsv"
+        }
+      ],
+      "programmingLanguage": {
+        "@id": "#snakemake"
+      },
+      "sdPublisher": {
+        "@id": "https://hub.autopipe.org"
+      },
+      "softwareRequirements": [
+        {
+          "@id": "#aptaselect-script"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "@id": "#author",
+      "@type": "Person",
+      "name": "khyeonm"
+    },
+    {
+      "@id": "#snakemake",
+      "@type": "ComputerLanguage",
+      "name": "Snakemake",
+      "url": "https://snakemake.readthedocs.io"
+    },
+    {
+      "@id": "#aptaselect-script",
+      "@type": "SoftwareApplication",
+      "name": "aptaselect.py (bundled)"
+    },
+    {
+      "@id": "#input-fastq",
+      "@type": "FormalParameter",
+      "encodingFormat": "application/x-fastq",
+      "name": "fastq"
+    },
+    {
+      "@id": "#input-fastq-gz",
+      "@type": "FormalParameter",
+      "encodingFormat": "application/gzip",
+      "name": "fastq.gz"
+    },
+    {
+      "@id": "#output-ranked-tsv",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/tab-separated-values",
+      "name": "stage ranked tables (sequence, count)"
+    },
+    {
+      "@id": "#output-summary-tsv",
+      "@type": "FormalParameter",
+      "encodingFormat": "text/tab-separated-values",
+      "name": "survival_summary.tsv"
+    }
+  ]
+}

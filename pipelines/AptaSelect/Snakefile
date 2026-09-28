@@ -1,0 +1,63 @@
+# AptaSelect - baseline (single-process, pure-Python) aptamer candidate selection
+configfile: "config.yaml"
+
+import os
+
+OUT = config.get("output_dir", "/output").rstrip("/") or "/output"
+SCRIPT = os.path.join(workflow.basedir, "scripts", "aptaselect.py")
+
+# ---- fail early on must-fill values -----------------------------------------
+_REQUIRED = ["r1", "r2", "lcr", "rcr", "max_errors", "left_marker", "right_marker",
+             "left_stem", "right_stem", "random_region_length"]
+_missing = [k for k in _REQUIRED if config.get(k) in (None, "")]
+if _missing:
+    raise ValueError("AptaSelect: please fill these config values: " + ", ".join(_missing))
+
+FINAL = [
+    f"{OUT}/stage0_raw.ranked.tsv",
+    f"{OUT}/stage1_matching.ranked.tsv",
+    f"{OUT}/stage2_flanking.ranked.tsv",
+    f"{OUT}/stage3_random_region.ranked.tsv",
+    f"{OUT}/survival_summary.tsv",
+]
+
+
+rule all:
+    input:
+        FINAL
+
+
+rule aptaselect:
+    """Stage 0-3 filtering and per-stage ranking, reads processed one after another
+    in a single process; Stage 1 uses a plain-Python edit-distance search."""
+    input:
+        r1=config["r1"],
+        r2=config["r2"],
+    output:
+        FINAL,
+    params:
+        script=SCRIPT,
+        outdir=OUT,
+        lcr=config["lcr"],
+        rcr=config["rcr"],
+        max_errors=config["max_errors"],
+        left_marker=config["left_marker"],
+        right_marker=config["right_marker"],
+        left_stem=config["left_stem"],
+        right_stem=config["right_stem"],
+        random_length=config["random_region_length"],
+        progress=config.get("progress_every", 100000),
+    threads: 1
+    log:
+        f"{OUT}/logs/aptaselect.log",
+    shell:
+        "python3 {params.script} "
+        "--reads {input.r1:q} {input.r2:q} "
+        "--outdir {params.outdir:q} "
+        "--lcr {params.lcr} --rcr {params.rcr} "
+        "--max-errors {params.max_errors} "
+        "--left-marker {params.left_marker} --right-marker {params.right_marker} "
+        "--left-stem {params.left_stem} --right-stem {params.right_stem} "
+        "--random-length {params.random_length} "
+        "--progress-every {params.progress} "
+        "2> {log:q}"
