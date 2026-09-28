@@ -24,7 +24,7 @@
         }
       ],
       "dateCreated": "2026-09-28",
-      "description": "AptaSelect identifies high-frequency aptamer candidate sequences from paired-end SELEX FASTQ files. Each read (R1 and R2 separately) is filtered in three stages: approximate (edit-distance) matching of both constant regions on either strand, exact-marker flanking extraction, and exact-stem random-region extraction at a user-set length. Identical sequences at every stage are counted and stably ranked by frequency. All library-design sequences, tolerances and lengths are configurable. Baseline single-process, pure-Python implementation.",
+      "description": "AptaSelect identifies high-frequency aptamer candidate sequences from paired-end SELEX FASTQ files. Each read (R1 and R2 separately) is filtered in three stages: approximate (edit-distance) matching of both constant regions on either strand, exact-marker flanking extraction, and exact-stem random-region extraction at a user-set length. Identical sequences at every stage are counted and stably ranked by frequency. All library-design sequences, tolerances and lengths are configurable. Optimized version: reads are processed by multiple worker processes (core count auto-detected from the process/container allocation, overridable) with results merged in original read order; Stage 1 uses the compiled edlib edit-distance library behind an exact-piece (pigeonhole) prefilter; progress is logged to logs/aptaselect.log. Output files are byte-for-byte identical to version 1.0.0.",
       "input": [
         {
           "@id": "#input-fastq"
@@ -43,7 +43,9 @@
         "sequence enrichment",
         "random region",
         "edit distance",
-        "ranking"
+        "ranking",
+        "multiprocessing",
+        "edlib"
       ],
       "license": {
         "@id": "https://spdx.org/licenses/MIT"
@@ -66,9 +68,12 @@
       "softwareRequirements": [
         {
           "@id": "#aptaselect-script"
+        },
+        {
+          "@id": "#edlib"
         }
       ],
-      "version": "1.0.0"
+      "version": "1.0.1"
     },
     {
       "@id": "#author",
@@ -85,6 +90,12 @@
       "@id": "#aptaselect-script",
       "@type": "SoftwareApplication",
       "name": "aptaselect.py (bundled)"
+    },
+    {
+      "@id": "#edlib",
+      "@type": "SoftwareApplication",
+      "name": "edlib",
+      "url": "https://github.com/Martinsos/edlib"
     },
     {
       "@id": "#input-fastq",
@@ -111,5 +122,5 @@
       "name": "survival_summary.tsv"
     }
   ],
-  "version": "1.0.0"
+  "version": "1.0.1"
 }

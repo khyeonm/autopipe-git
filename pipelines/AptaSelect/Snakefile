@@ -1,4 +1,4 @@
-# AptaSelect - baseline (single-process, pure-Python) aptamer candidate selection
+# AptaSelect - multi-process aptamer candidate selection
 configfile: "config.yaml"
 
 import os
@@ -21,6 +21,8 @@ FINAL = [
     f"{OUT}/survival_summary.tsv",
 ]
 
+_WORKERS = int(config.get("workers", 0) or 0)
+
 
 rule all:
     input:
@@ -28,8 +30,9 @@ rule all:
 
 
 rule aptaselect:
-    """Stage 0-3 filtering and per-stage ranking, reads processed one after another
-    in a single process; Stage 1 uses a plain-Python edit-distance search."""
+    """Stage 0-3 filtering and per-stage ranking. Reads are processed by a pool
+    of worker processes in batches; results are merged in original read order.
+    Progress is logged to logs/aptaselect.log (separate from the result files)."""
     input:
         r1=config["r1"],
         r2=config["r2"],
@@ -47,7 +50,11 @@ rule aptaselect:
         right_stem=config["right_stem"],
         random_length=config["random_region_length"],
         progress=config.get("progress_every", 100000),
-    threads: 1
+        progress_seconds=config.get("progress_seconds", 60),
+        workers=_WORKERS,
+        batch_size=config.get("batch_size", 2000),
+    # auto mode may use up to all cores given to Snakemake; an explicit value reserves that many
+    threads: _WORKERS if _WORKERS > 0 else workflow.cores
     log:
         f"{OUT}/logs/aptaselect.log",
     shell:
@@ -59,5 +66,7 @@ rule aptaselect:
         "--left-marker {params.left_marker} --right-marker {params.right_marker} "
         "--left-stem {params.left_stem} --right-stem {params.right_stem} "
         "--random-length {params.random_length} "
-        "--progress-every {params.progress} "
+        "--progress-every {params.progress} --progress-seconds {params.progress_seconds} "
+        "--workers {params.workers} --max-workers {threads} "
+        "--batch-size {params.batch_size} "
         "2> {log:q}"

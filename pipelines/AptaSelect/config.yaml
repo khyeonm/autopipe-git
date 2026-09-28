@@ -19,5 +19,11 @@ left_stem:    # Required: left stem sequence, matched exactly
 right_stem:   # Required: right stem sequence, matched exactly
 random_region_length:   # Required: exact random-region (N) length between the stems; insert length = LCR + left stem + N + right stem + RCR
 
-# Log a progress line every this many reads (0 disables)
-progress_every: 100000
+# ------------------------------------------------------------------ parallelism
+workers: 0         # Worker processes; 0 = auto (CPUs allocated to this process/container via affinity + cgroup quota, capped by Snakemake --cores)
+batch_size: 2000   # Reads per work unit sent to a worker; results stay identical at any value, but too large leaves cores idle (fewer batches than workers)
+
+# ---------------------------------------------------------- progress logging
+# Progress goes to logs/aptaselect.log only; result files are not affected.
+progress_every: 100000   # Log a progress line every this many reads (0 disables)
+progress_seconds: 60     # Also log a progress line when this many seconds have passed since the last one (0 disables)
