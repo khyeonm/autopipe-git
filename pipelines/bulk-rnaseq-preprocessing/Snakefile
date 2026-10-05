@@ -10,9 +10,15 @@ import os
 NFCORE_VERSION = config.get("nfcore_rnaseq_version", "3.22.2")
 ALIGNER       = config.get("aligner", "star_salmon")
 GENOME        = config.get("genome", None)
-FASTA         = config.get("fasta", "")
-GTF           = config.get("gtf", "")
-SAMPLESHEET   = config.get("samplesheet", "Mus_sheet.csv")
+def _rel(p):
+    """Accept a path relative to the input dir OR an absolute /input/... path
+    (the AutoPipe input form writes the latter when a file is picked)."""
+    p = (p or "").strip()
+    return p[len("/input/"):] if p.startswith("/input/") else p
+
+FASTA         = _rel(config.get("fasta", ""))
+GTF           = _rel(config.get("gtf", ""))
+SAMPLESHEET   = _rel(config.get("samplesheet", "Mus_sheet.csv"))
 EXTRA_ARGS    = config.get("extra_args", "")
 MAX_CPUS      = config.get("max_cpus", 16)
 MAX_MEMORY    = config.get("max_memory", "64.GB")

@@ -15,12 +15,12 @@ aligner: "star_salmon"
 genome: null
 
 # Required when genome is null — paths relative to /input
-fasta: "References/Mus_musculus.GRCm39.dna_sm.primary_assembly.fa.gz"
-gtf: "References/Mus_musculus.GRCm39.113.gtf.gz"
+fasta: "/input/References/Mus_musculus.GRCm39.dna_sm.primary_assembly.fa.gz"
+gtf: "/input/References/Mus_musculus.GRCm39.113.gtf.gz"
 
 # ── Samplesheet ──────────────────────────────────────────────
 # nf-core samplesheet CSV (relative to /input)
-samplesheet: "Mus_sheet.csv"
+samplesheet: "/input/Mus_sheet.csv"
 
 # ── Resource limits ──────────────────────────────────────────
 max_cpus: 16
